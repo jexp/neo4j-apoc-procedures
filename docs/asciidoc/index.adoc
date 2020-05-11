@@ -37,6 +37,7 @@ The guide covers the following areas:
 * <<job-management>> -- A detailed guide to procedures that can be used for background job management.
 * <<database-introspection>> -- A detailed guide to procedures that can be used to introspect the database.
 * <<operational>> -- A detailed guide to operational procedures.
+* <<concurrent>> -- A detailed guide to semaphore and other concurrency procedures.
 * <<misc>> -- A detailed guide to miscellaneous procedures and functions, including map and collection functions, text functions, and spatial functionality.
 * <<indexes>> -- A detailed guide to indexing procedures.
 * <<algorithms>> -- A detailed guide to Graph Algorithms.
@@ -153,6 +154,8 @@ include::_job_management.adoc[]
 include::_database_introspection.adoc[]
 
 include::_operational.adoc[]
+
+include::_concurrent.adoc[]
 
 include::_misc.adoc[]
 

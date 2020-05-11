@@ -1,0 +1,69 @@
+[[semaphore]]
+= Cypher execution in semaphores
+
+[abstract]
+--
+This section describes a hook to run Cypher commands after database initialization.
+--
+
+Using a semaphore you can control concurrency. You can define semaphores either via configuration or create them explicitly.
+Semaphores do have a name and a number of available permits.
+
+### Configuration
+
+In `apoc.conf` you can define multiple semaphores
+
+[source,config]
+----
+apoc.semaphore.<mysemaphoreName>=<numberOfPermits>
+----
+
+Example:
+[source,config]
+----
+apoc.semaphore.onlyOnce=1
+----
+
+### Managing semaphores
+
+Additionally to config based setup you can use:
+
+[source,cypher]
+----
+CALL apoc.concurrent.addSemaphore("onlyOnce", 1)
+----
+
+To remove semaphores:
+
+[source,cypher]
+----
+CALL apoc.concurrent.removeSemaphore("onlyOnce")  // removes that specific semaphores
+CALL apoc.concurrent.removeAllSemaphores() // removes all semaphores
+----
+
+Note that the procedure based setup will only affect this instance.
+If you use them in a cluster, you have to run them on each cluster member to stay in sync.
+
+### Using semaphores
+
+You can wrap any cypher statement into a semaphore based execution:
+
+[source,cypher]
+----
+CALL apoc.concurrent.runInSemaphore(<semaphoreName>, <cypher>, <params / optional>) YIELD value
+RETURN value.n
+----
+
+`runInSemaphores` acquires a permit from the named semaphore. If there's no permit is available it will wait.
+While waiting a check for termination is run, effectively making it possible to kill waiting queries.
+After a permit has been acquired, the statement is run with the optionally provided parameters.
+Once finishing consuming the results the permit is passed back to the semaphore.
+
+If you have a semaphore with 1 permit this means effectively serialization of all operations on this semaphore.
+
+Example:
+[source,cypher]
+----
+CALL apoc.concurrent.runInSemaphore("onlyOnce", "MATCH (n) RETURN n") YIELD value
+RETURN value.n
+----

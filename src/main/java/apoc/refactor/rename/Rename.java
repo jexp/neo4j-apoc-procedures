@@ -1,15 +1,27 @@
 package apoc.refactor.rename;
 
+import apoc.ApocConfig;
 import apoc.Pools;
+import apoc.concurrent.Semaphores;
 import apoc.periodic.Periodic;
 import apoc.periodic.Periodic.BatchAndTotalResult;
 import apoc.util.MapUtil;
 import apoc.util.Util;
-import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.schema.ConstraintDefinition;
 import org.neo4j.graphdb.schema.IndexDefinition;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
+import org.neo4j.procedure.TerminationGuard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +54,12 @@ public class Rename {
 
     @Context
 	public Transaction tx;
+
+    @Context
+	public ApocConfig apocConfig;
+
+    @Context
+	public Semaphores semaphores;
 
     /**
 	 * Rename the Label of a node by creating a new one and deleting the old.
@@ -108,6 +126,8 @@ public class Rename {
         periodic.terminationGuard = this.terminationGuard;
         periodic.pools = this.pools;
         periodic.tx = this.tx;
+        periodic.apocConfig = this.apocConfig;
+        periodic.semaphores = this.semaphores;
         return periodic;
     }
 

@@ -1,11 +1,14 @@
 package apoc.periodic;
 
+import apoc.ApocConfig;
 import apoc.load.Jdbc;
 import apoc.util.MapUtil;
 import apoc.util.TestUtil;
+import apoc.util.Utils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.ProvideSystemProperty;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
@@ -20,9 +23,12 @@ import org.neo4j.test.rule.ImpermanentDbmsRule;
 
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -46,9 +52,13 @@ public class PeriodicTest {
     @Rule
     public DbmsRule db = new ImpermanentDbmsRule();
 
+    @Rule
+    public final ProvideSystemProperty systemPropertyRule = new ProvideSystemProperty("apoc.semaphore.one", "1")
+            .and("apoc.semaphore.two", "2");
+
     @Before
     public void initDb() throws Exception {
-        TestUtil.registerProcedure(db, Periodic.class, Jdbc.class);
+        TestUtil.registerProcedure(db, Periodic.class, Jdbc.class, Utils.class);
         db.executeTransactionally("call apoc.periodic.list() yield name call apoc.periodic.cancel(name) yield name as name2 return count(*)");
     }
 
@@ -83,8 +93,8 @@ public class PeriodicTest {
         assertFalse(Periodic.slottedRuntime("cypher 3.1 MATCH (n) RETURN n").contains(" runtime=slotted cypher "));
         assertTrue(Periodic.slottedRuntime("cypher expressionEngine=compiled MATCH (n) RETURN n").contains(" runtime=slotted "));
         assertFalse(Periodic.slottedRuntime("cypher expressionEngine=compiled MATCH (n) RETURN n").contains(" runtime=slotted cypher"));
-
     }
+
     @Test
     public void testTerminateCommit() throws Exception {
         testTerminatePeriodicQuery("CALL apoc.periodic.commit('UNWIND range(0,1000) as id WITH id CREATE (:Foo {id: id}) limit 1000', {})");
@@ -575,6 +585,74 @@ public class PeriodicTest {
             assertEquals(expected, e.getMessage());
             throw e;
         }
+    }
+
+    @Test
+    public void testPeriodicSemaphore() throws InterruptedException {
+        long duration = 100;
+        String cypher = "call apoc.periodic.iterate('return 1', 'call apoc.util.sleep($duration) return 1',{semaphore: $semaphore, params: {duration: $duration}}) ";
+        db.executeTransactionally(cypher, map("duration", 1, "semaphore", "one")); // for heating up cypher query plan
+
+        long millis = runMultipleTimes(2, cypher, duration, "one");
+        assertTrue( "took " + millis, millis > 2 * duration );
+
+        millis = runMultipleTimes(2, cypher, duration, "two");
+        assertTrue( "took " + millis, millis < 2 * duration );
+    }
+
+    private long runMultipleTimes(int times, String cypher, long duration, String semaphore) {
+        long now = System.currentTimeMillis();
+        AtomicBoolean failureInThread = new AtomicBoolean(false);
+
+        Map<String, Object> params = map("duration", duration);
+        if (semaphore!=null) {
+            params.put("semaphore", semaphore);
+        }
+
+        Set<Thread> threads = new HashSet<>();
+        for (int i=0; i < times; i++) {
+            threads.add(new Thread(() -> {
+                try {
+                    Map<String, Object> r = db.executeTransactionally(cypher, params, Iterators::single);
+                    Map<String, Object> errorMessages = (Map<String, Object>) r.get("errorMessages");
+                    if (!errorMessages.isEmpty()) {
+                        failureInThread.set(true);
+//                        System.out.println("failed: " + errorMessages);
+                    }
+                } catch (Exception e) {
+                    failureInThread.set(true);
+//                    System.out.println(e.getMessage());
+                }
+            }));
+        }
+
+        if (failureInThread.get()) {
+            throw new RuntimeException("execution in child thread failed.");  // safety net
+        }
+
+        threads.forEach(Thread::start);
+        threads.forEach(thread -> {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return System.currentTimeMillis() - now;
+    }
+
+    @Test
+    public void testDefaultSemaphore() {
+        ApocConfig.apocConfig().setProperty(ApocConfig.APOC_SEMAPHORE_DEFAULT_NAME, "one");
+
+        long duration = 100;
+        String cypher = "call apoc.periodic.iterate('return 1', 'call apoc.util.sleep($duration) return 1',{params: {duration: $duration}}) "; // NOTE: we don't provide a semaphore name
+        db.executeTransactionally(cypher, map("duration", 1)); // for heating up cypher query plan
+
+        long millis = runMultipleTimes(2, cypher, duration, null);
+        assertTrue( "took " + millis, millis > 2 * duration );
+
+        ApocConfig.apocConfig().setProperty(ApocConfig.APOC_SEMAPHORE_DEFAULT_NAME, null);
     }
 
     private void testFail(String query) {

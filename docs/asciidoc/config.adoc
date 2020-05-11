@@ -52,9 +52,6 @@ apoc.spatial.geocode.<providerName>.<key>=<value>
 | apoc.ttl.schedule=<secs> (default `60`) | Set frequency in seconds to run ttl background task
 | apoc.ttl.limit=<number> (default 1000) | Maximum number of nodes being deleted in one background transaction
 | apoc.uuid.enabled=false/true (default false) | global switch to enable uuid handlers
-
-
-//public static final String APOC_JSON_ZIP_URL = "apoc.json.zip.url";
-//public static final String APOC_JSON_SIMPLE_JSON_URL = "apoc.json.simpleJson.url";
-
+| apoc.semaphore.default.name (default null) | default <<semaphore>> to be used in <<commit-batching, apoc.periodic.iterate>> if not given explicitly
+| apoc.semaphore.<someIdentifier> = <number>  | a semaphore defined with name and number of permits
 |===

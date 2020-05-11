@@ -1,0 +1,13 @@
+[[concurrent]]
+== Concurrency
+
+[abstract]
+--
+This chapter describes procedures dealing with concurrency in the APOC library.
+--
+
+For more information on how to use these procedures, see:
+
+* <<semaphore>>
+
+include::concurrent/semaphore.adoc[leveloffset=2]

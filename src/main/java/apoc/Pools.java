@@ -11,7 +11,19 @@ import org.neo4j.procedure.impl.GlobalProceduresRegistry;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -23,7 +35,6 @@ public class Pools extends LifecycleAdapter {
     private final GlobalProceduresRegistry globalProceduresRegistry;
     private final ApocConfig apocConfig;
 
-    private ExecutorService singleExecutorService = Executors.newSingleThreadExecutor();
     private ScheduledExecutorService scheduledExecutorService;
     private ExecutorService defaultExecutorService;
 
@@ -63,7 +74,7 @@ public class Pools extends LifecycleAdapter {
 
     @Override
     public void shutdown() throws Exception {
-        Stream.of(singleExecutorService, defaultExecutorService, scheduledExecutorService).forEach( service -> {
+        Stream.of(defaultExecutorService, scheduledExecutorService).forEach( service -> {
             try {
                 service.shutdown();
                 service.awaitTermination(10, TimeUnit.SECONDS);
@@ -71,10 +82,6 @@ public class Pools extends LifecycleAdapter {
 
             }
         });
-    }
-
-    public ExecutorService getSingleExecutorService() {
-        return singleExecutorService;
     }
 
     public ScheduledExecutorService getScheduledExecutorService() {

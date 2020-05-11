@@ -30,6 +30,7 @@ The results of the outer statement are passed to the inner statement as paramete
 | params | {} | externally pass in map of params
 | concurrency | 50 | number of concurrent tasks are generated when using `parallel:true`
 | failedParams | -1 | if set to a non-negative value, each failed batch up to `failedParams` parameter sets are returned in `yield failedParams`.
+| semaphore | value of config option `apoc.semaphore.default.name` | Name of the <<semaphore>> to be used.
 |===
 
 .Examples

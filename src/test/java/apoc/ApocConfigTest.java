@@ -45,15 +45,15 @@ public class ApocConfigTest {
 
     @Test
     public void testDetermineNeo4jConfFolder() {
-        System.setProperty(SUN_JAVA_COMMAND, "com.neo4j.server.enterprise.CommercialEntryPoint --home-dir=/home/stefan/neo4j-enterprise-4.0.0-alpha09mr02 --config-dir=/home/stefan/neo4j-enterprise-4.0.0-alpha09mr02/conf");
+        System.setProperty(SUN_JAVA_COMMAND, "com.neo4j.server.enterprise.CommercialEntryPoint --home-dir=/home/stefan/neo4j-enterprise-4.0.3 --config-dir=/home/stefan/neo4j-enterprise-4.0.3/conf");
 
-        assertEquals("/home/stefan/neo4j-enterprise-4.0.0-alpha09mr02/conf", cut.determineNeo4jConfFolder());
+        assertEquals("/home/stefan/neo4j-enterprise-4.0.3/conf", cut.determineNeo4jConfFolder());
     }
 
     @Test
     public void testApocConfFileBeingLoaded() throws Exception {
         String confDir = new File(getClass().getClassLoader().getResource("apoc.conf").toURI()).getParent();
-        System.setProperty(SUN_JAVA_COMMAND, "com.neo4j.server.enterprise.CommercialEntryPoint --home-dir=/home/stefan/neo4j-enterprise-4.0.0-alpha09mr02 --config-dir=" + confDir);
+        System.setProperty(SUN_JAVA_COMMAND, "com.neo4j.server.enterprise.CommercialEntryPoint --home-dir=/home/stefan/neo4j-enterprise-4.0.3 --config-dir=" + confDir);
         cut.init();
 
         assertEquals("bar", cut.getConfig().getString("foo"));
@@ -61,8 +61,8 @@ public class ApocConfigTest {
 
     @Test
     public void testDetermineNeo4jConfFolderWithWhitespaces() {
-        System.setProperty(SUN_JAVA_COMMAND, "com.neo4j.server.enterprise.CommercialEntryPoint --config-dir=/home/stefan/neo4j enterprise-4.0.0-alpha09mr02/conf --home-dir=/home/stefan/neo4j enterprise-4.0.0-alpha09mr02");
+        System.setProperty(SUN_JAVA_COMMAND, "com.neo4j.server.enterprise.CommercialEntryPoint --config-dir=/home/stefan/neo4j enterprise-4.0.3/conf --home-dir=/home/stefan/neo4j enterprise-4.0.3");
 
-        assertEquals("/home/stefan/neo4j enterprise-4.0.0-alpha09mr02/conf", cut.determineNeo4jConfFolder());
+        assertEquals("/home/stefan/neo4j enterprise-4.0.3/conf", cut.determineNeo4jConfFolder());
     }
 }

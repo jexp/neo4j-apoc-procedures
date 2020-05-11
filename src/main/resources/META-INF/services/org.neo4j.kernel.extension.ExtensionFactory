@@ -2,3 +2,4 @@ apoc.RegisterComponentFactory
 apoc.ApocConfigExtensionFactory
 apoc.PoolExtensionFactory
 apoc.ApocExtensionFactory
+apoc.concurrent.SemaphoreExtensionFactory
