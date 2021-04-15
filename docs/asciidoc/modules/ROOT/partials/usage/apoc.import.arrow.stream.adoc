@@ -1,0 +1,7 @@
+This procedure parses an arrow byte[] converting the content into a Cyper Types
+
+[source,cypher]
+----
+CALL apoc.load.arrow.stream(arrowByteArray) YIELD value
+RETURN value.myCol, value.myOtherCol
+----

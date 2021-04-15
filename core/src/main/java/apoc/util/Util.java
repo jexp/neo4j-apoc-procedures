@@ -32,7 +32,6 @@ import org.neo4j.procedure.TerminationGuard;
 import javax.lang.model.SourceVersion;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -90,7 +89,6 @@ import static apoc.ApocConfig.apocConfig;
 import static apoc.util.DateFormatUtil.getOrCreate;
 import static java.lang.String.format;
 import static org.eclipse.jetty.util.URIUtil.encodePath;
-import static org.eclipse.jetty.util.URIUtil.encodeSpaces;
 
 /**
  * @author mh
@@ -743,7 +741,7 @@ public class Util {
         }
     }
 
-    public static void close(Closeable closeable, Consumer<Exception> onErrror) {
+    public static void close(AutoCloseable closeable, Consumer<Exception> onErrror) {
         try {
             if (closeable!=null) closeable.close();
         } catch (Exception e) {
@@ -754,7 +752,7 @@ public class Util {
         }
     }
 
-    public static void close(Closeable closeable) {
+    public static void close(AutoCloseable closeable) {
         close(closeable, null);
     }
 

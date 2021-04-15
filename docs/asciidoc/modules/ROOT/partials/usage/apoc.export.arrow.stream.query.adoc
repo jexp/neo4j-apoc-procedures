@@ -1,0 +1,19 @@
+Let's suppose we have this data set:
+
+[source,cypher]
+----
+CREATE (f:User {name:'Adam',age:42,male:true,kids:['Sam','Anna','Grace'], born:localdatetime('2015185T19:32:24'), place:point({latitude: 13.1, longitude: 33.46789})})-[:KNOWS {since: 1993, bffSince: duration('P5M1.5D')}]->(b:User {name:'Jim',age:42}),(c:User {name: 'John', age:12}),(d:Another {foo: 'bar'})
+----
+
+With this query:
+
+[source,cypher]
+----
+CALL apoc.export.arrow.stream.query('MATCH (n:User) RETURN count(n) as count, n.name as name')
+YIELD value RETURN value
+----
+
+We'll have a table with the following columns:
+
+- `count`
+- `name`

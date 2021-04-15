@@ -8,7 +8,7 @@ import java.util.Map;
  * @since 26.02.16
  */
 public class MapResult {
-	private static final MapResult EMPTY = new MapResult(Collections.emptyMap());
+	public static final MapResult EMPTY = new MapResult(Collections.emptyMap());
 	public final Map<String, Object> value;
 
 	public static MapResult empty() {
