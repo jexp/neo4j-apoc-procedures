@@ -4,6 +4,7 @@ import apoc.ApocConfig;
 import apoc.Pools;
 import apoc.export.util.NodesAndRelsSubGraph;
 import apoc.result.ByteArrayResult;
+import apoc.result.ProgressInfo;
 import apoc.result.VirtualGraph;
 import org.neo4j.cypher.export.DatabaseSubGraph;
 import org.neo4j.cypher.export.SubGraph;
@@ -76,5 +77,39 @@ public class ExportArrow {
         Map<String, Object> params = config == null ? Collections.emptyMap() : (Map<String, Object>) config.getOrDefault("params", Collections.emptyMap());
         Result result = tx.execute(query, params);
         return new ExportArrowService(db, pools, terminationGuard, logger).stream(result, new ArrowConfig(config));
+    }
+
+    @Procedure("apoc.export.arrow.all")
+    @Description("apoc.export.arrow.all(fileName, config) - exports whole database as arrow file")
+    public Stream<ProgressInfo> all(@Name("fileName") String fileName, @Name(value = "config", defaultValue = "{}") Map<String, Object> config) throws Exception {
+        return new ExportArrowService(db, pools, terminationGuard, logger).file(fileName, new DatabaseSubGraph(tx), new ArrowConfig(config));
+    }
+
+    @Procedure("apoc.export.arrow.graph")
+    @Description("apoc.export.arrow.graph(fileName, graph, config) - exports given nodes and relationships as arrow file")
+    public Stream<ProgressInfo> graph(@Name("fileName") String fileName, @Name("graph") Object graph, @Name(value = "config", defaultValue = "{}") Map<String, Object> config) throws Exception {
+        final SubGraph subGraph;
+        if (graph instanceof Map) {
+            Map<String, Object> mGraph = (Map<String, Object>) graph;
+            if (!mGraph.containsKey("nodes")) {
+                throw new IllegalArgumentException("Graph Map must contains `nodes` field and `relationships` optionally");
+            }
+            subGraph = new NodesAndRelsSubGraph(tx, (Collection<Node>) mGraph.get("nodes"),
+                    (Collection<Relationship>) mGraph.get("relationships"));
+        } else if (graph instanceof VirtualGraph) {
+            VirtualGraph vGraph = (VirtualGraph) graph;
+            subGraph = new NodesAndRelsSubGraph(tx, vGraph.nodes(), vGraph.relationships());
+        } else {
+            throw new IllegalArgumentException("Supported inputs are VirtualGraph, Map");
+        }
+        return new ExportArrowService(db, pools, terminationGuard, logger).file(fileName, subGraph, new ArrowConfig(config));
+    }
+
+    @Procedure("apoc.export.arrow.query")
+    @Description("apoc.export.arrow.query(fileName, query, config) - exports results from the cypher statement as arrow file")
+    public Stream<ProgressInfo> query(@Name("fileName") String fileName, @Name("query") String query, @Name(value = "config", defaultValue = "{}") Map<String, Object> config) throws Exception {
+        Map<String, Object> params = config == null ? Collections.emptyMap() : (Map<String, Object>) config.getOrDefault("params", Collections.emptyMap());
+        Result result = tx.execute(query, params);
+        return new ExportArrowService(db, pools, terminationGuard, logger).file(fileName, result, new ArrowConfig(config));
     }
 }

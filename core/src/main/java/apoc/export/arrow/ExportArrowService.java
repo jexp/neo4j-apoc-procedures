@@ -2,6 +2,7 @@ package apoc.export.arrow;
 
 import apoc.Pools;
 import apoc.result.ByteArrayResult;
+import apoc.result.ProgressInfo;
 import org.neo4j.cypher.export.SubGraph;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
@@ -29,6 +30,14 @@ public class ExportArrowService {
             return new ExportResultStreamStrategy(db, pools, terminationGuard, logger).export((Result) data, config);
         } else {
             return new ExportGraphStreamStrategy(db, pools, terminationGuard, logger).export((SubGraph) data, config);
+        }
+    }
+
+    public Stream<ProgressInfo> file(String fileName, Object data, ArrowConfig config) {
+        if (data instanceof Result) {
+            return new ExportResultFileStrategy(fileName, db, pools, terminationGuard, logger).export((Result) data, config);
+        } else {
+            return new ExportGraphFileStrategy(fileName, db, pools, terminationGuard, logger).export((SubGraph) data, config);
         }
     }
 }

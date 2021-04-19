@@ -1,0 +1,29 @@
+Given an Arrow byte[] contains people and their properties:
+
+.test.arrow
+----
+name,age,beverage
+Selma,9,Soda
+Rana,12,Tea,Milk
+Selina,19,Cola
+----
+
+We'll provide a full roundtrip example where we use the `apoc.export.arrow.stream.all`
+in order to generate the arrow byte[]
+
+
+[source, cypher]
+----
+CALL apoc.export.arrow.stream.all() YIELD value AS byteArray
+CALL apoc.load.arrow.stream(byteArray) YIELD value
+RETURN value
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| value
+| {name: "Selma", age: "9", beverage: "Soda"}
+| {name: "Rana", age: "12", beverage: "Tea;Milk"}
+| {name: "Selina", age: "19", beverage: "Cola"}
+|===

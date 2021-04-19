@@ -19,10 +19,11 @@ import org.apache.arrow.vector.types.pojo.ArrowType;
 import org.apache.arrow.vector.types.pojo.Field;
 import org.apache.arrow.vector.types.pojo.FieldType;
 import org.apache.arrow.vector.types.pojo.Schema;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.logging.Log;
+import org.neo4j.procedure.TerminationGuard;
 import org.neo4j.values.storable.DurationValue;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -34,7 +35,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ExecutorService;
 
 public interface ExportArrowStrategy<IN, OUT> {
 
@@ -45,6 +46,16 @@ public interface ExportArrowStrategy<IN, OUT> {
     ArrowWriter newArrowWriter(VectorSchemaRoot root, OutputStream out);
 
     Schema schemaFor(List<Map<String, Object>> rows);
+
+    TerminationGuard getTerminationGuard();
+
+    BufferAllocator getBufferAllocator();
+
+    GraphDatabaseService getGraphDatabaseApi();
+
+    ExecutorService getExecutorService();
+
+    Log getLogger();
 
     static String fromMetaType(Meta.Types type) {
         switch (type) {
@@ -126,33 +137,7 @@ public interface ExportArrowStrategy<IN, OUT> {
         }
     }
 
-    default byte[] writeBatch(AtomicInteger counter, BufferAllocator bufferAllocator, List<Map<String, Object>> rows) {
-        try (final VectorSchemaRoot root = VectorSchemaRoot.create(schemaFor(rows), bufferAllocator);
-             final ByteArrayOutputStream out = new ByteArrayOutputStream();
-             final ArrowWriter writer = newArrowWriter(root, out)) {
-            rows.forEach(row -> {
-                final int index = counter.getAndIncrement();
-                root.allocateNew();
-                row.forEach((prop, value) -> {
-                    final FieldVector fieldVector = root.getVector(prop);
-                    value = convertValue(value);
-                    write(index, value, fieldVector);
-                });
-                root.setRowCount(counter.get());
-                try {
-                    writer.writeBatch();
-                } catch (IOException ignored) {
-                    ignored.printStackTrace();
-                }
-                root.clear();
-            });
-            return out.toByteArray();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void write(int index, Object value, FieldVector fieldVector) {
+    default void write(int index, Object value, FieldVector fieldVector) {
         if (fieldVector instanceof BaseVariableWidthVector) {
             writeBaseVariableWidthVector(index, value, (BaseVariableWidthVector) fieldVector);
         } else if (fieldVector instanceof BigIntVector) {
@@ -170,6 +155,10 @@ public interface ExportArrowStrategy<IN, OUT> {
 
     private void writeListVector(int index, Object value, FieldVector fieldVector) {
         ListVector listVector = (ListVector) fieldVector;
+        if (value == null) {
+            listVector.setNull(index);
+            return;
+        }
         UnionListWriter listWriter = listVector.getWriter();
         Object[] array;
         if (value instanceof Collection) {
@@ -207,7 +196,7 @@ public interface ExportArrowStrategy<IN, OUT> {
             } else if (inner instanceof BitVector) {
                 boolean bool = (boolean) val;
                 listWriter.bit().writeBit(bool ? 1 : 0);
-            }
+            } // TODO datemilli
         }
         listWriter.endList();
     }
@@ -272,15 +261,15 @@ public interface ExportArrowStrategy<IN, OUT> {
         final BaseVariableWidthVector baseVector = fieldVector;
         if (value == null) {
             baseVector.setNull(index);
+            return;
+        }
+        if (value instanceof DurationValue) {
+            value = ((DurationValue) value).toString();
+        }
+        if (value instanceof String) {
+            baseVector.setSafe(index, value.toString().getBytes(StandardCharsets.UTF_8));
         } else {
-            if (value instanceof DurationValue) {
-                value = ((DurationValue) value).toString();
-            }
-            if (value instanceof String) {
-                baseVector.setSafe(index, value.toString().getBytes(StandardCharsets.UTF_8));
-            } else {
-                baseVector.setSafe(index, JsonUtil.writeValueAsBytes(value));
-            }
+            baseVector.setSafe(index, JsonUtil.writeValueAsBytes(value));
         }
     }
 }

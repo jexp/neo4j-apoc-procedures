@@ -11,10 +11,9 @@ import org.apache.arrow.vector.dictionary.DictionaryProvider;
 import org.apache.arrow.vector.ipc.ArrowStreamWriter;
 import org.apache.arrow.vector.ipc.ArrowWriter;
 import org.apache.arrow.vector.types.pojo.Schema;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.TerminationGuard;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -32,8 +30,33 @@ public interface ExportArrowStreamStrategy<IN> extends ExportArrowStrategy<IN, S
 
     Iterator<Map<String, Object>> toIterator(IN data);
 
+    default byte[] writeBatch(BufferAllocator bufferAllocator, List<Map<String, Object>> rows) {
+        try (final VectorSchemaRoot root = VectorSchemaRoot.create(schemaFor(rows), bufferAllocator);
+             final ByteArrayOutputStream out = new ByteArrayOutputStream();
+             final ArrowWriter writer = newArrowWriter(root, out)) {
+            AtomicInteger counter = new AtomicInteger();
+            root.allocateNew();
+            rows.forEach(row -> {
+                final int index = counter.getAndIncrement();
+                root.getFieldVectors()
+                        .forEach(fe -> {
+                            Object value = convertValue(row.get(fe.getName()));
+                            write(index, value, fe);
+                        });
+            });
+            root.setRowCount(counter.get());
+            try {
+                writer.writeBatch();
+            } catch (IOException ignored) {}
+            root.clear();
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     default Stream<ByteArrayResult> export(IN data, ArrowConfig config) {
-        final BlockingQueue<apoc.result.ByteArrayResult> queue = new ArrayBlockingQueue<>(1000);
+        final BlockingQueue<apoc.result.ByteArrayResult> queue = new ArrayBlockingQueue<>(100);
         Util.inTxFuture(getExecutorService(), getGraphDatabaseApi(), txInThread -> {
             int batchCount = 0;
             List<Map<String, Object>> rows = new ArrayList<>(config.getBatchSize());
@@ -42,20 +65,20 @@ public interface ExportArrowStreamStrategy<IN> extends ExportArrowStrategy<IN, S
                 while (!Util.transactionIsTerminated(getTerminationGuard()) && it.hasNext()) {
                     rows.add(it.next());
                     if (batchCount > 0 && batchCount % config.getBatchSize() == 0) {
-                        final byte[] bytes = writeBatch(getCounter(), getBufferAllocator(), rows);
-                        QueueUtil.put(queue, new apoc.result.ByteArrayResult(bytes), 10);
+                        final byte[] bytes = writeBatch(getBufferAllocator(), rows);
+                        QueueUtil.put(queue, new ByteArrayResult(bytes), 10);
                         rows.clear();
                     }
                     ++batchCount;
                 }
                 if (!rows.isEmpty()) {
-                    final byte[] bytes = writeBatch(getCounter(), getBufferAllocator(), rows);
-                    QueueUtil.put(queue, new apoc.result.ByteArrayResult(bytes), 10);
+                    final byte[] bytes = writeBatch(getBufferAllocator(), rows);
+                    QueueUtil.put(queue, new ByteArrayResult(bytes), 10);
                 }
             } catch (Exception e) {
                 getLogger().error("Exception while extracting Arrow data:", e);
             } finally {
-                QueueUtil.put(queue, apoc.result.ByteArrayResult.NULL, 10);
+                QueueUtil.put(queue, ByteArrayResult.NULL, 10);
             }
             return true;
         });
@@ -64,20 +87,8 @@ public interface ExportArrowStreamStrategy<IN> extends ExportArrowStrategy<IN, S
                 .onClose(() -> Util.close(getBufferAllocator()));
     }
 
-    TerminationGuard getTerminationGuard();
-
-    BufferAllocator getBufferAllocator();
-
-    AtomicInteger getCounter();
-
-    GraphDatabaseService getGraphDatabaseApi();
-
-    ExecutorService getExecutorService();
-
-    Log getLogger();
-
     default Object convertValue(Object data) {
-        return Json.writeJsonResult(data);
+        return data == null ? null : Json.writeJsonResult(data);
     }
 
     default ArrowWriter newArrowWriter(VectorSchemaRoot root, OutputStream out) {
