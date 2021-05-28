@@ -37,6 +37,19 @@ public class CollTest {
     }
 
     @Test
+    public void testStandardDeviation() throws Exception {
+        testCall(db, "RETURN apoc.coll.stdev([10, 12, 23, 23, 16, 23, 21, 16]) as value",
+                (row) -> assertEquals(5.237229365663817D, row.get("value")));
+
+        testCall(db, "RETURN apoc.coll.stdev([10, 12, 23, 23, 16, 23, 21, 16], false) as value",
+                (row) -> assertEquals(4.898979485566356D, row.get("value")));
+        
+        // conversion from double to long
+        testCall(db, "RETURN apoc.coll.stdev([10, 12, 23]) as value",
+                (row) -> assertEquals(7L, row.get("value")));
+    }
+
+    @Test
     public void testZip() throws Exception {
         testCall(db, "RETURN apoc.coll.zip([1,2,3],[4,5]) as value",
                 (row) -> {

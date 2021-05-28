@@ -462,6 +462,11 @@ apoc.coll.sortNodes([nodes], 'name') sort nodes by property
 apoc.coll.sortText(coll) sort on string based collections
 |label:function[]
 |label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.stdev.adoc[apoc.coll.stdev icon:book[]]
+
+apoc.coll.stdev(list, isBiasCorrected) - returns the sample or population standard deviation with isBiasCorrected true or false respectively. For example apoc.coll.stdev([10, 12, 23]) return 7
+|label:function[]
+|label:apoc-core[]
 |xref::overview/apoc.coll/apoc.coll.subtract.adoc[apoc.coll.subtract icon:book[]]
 
 apoc.coll.subtract(first, second) - returns unique set of first list with all elements of second list removed

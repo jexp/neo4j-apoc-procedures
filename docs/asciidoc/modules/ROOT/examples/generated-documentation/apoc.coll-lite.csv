@@ -45,6 +45,7 @@
 ¦apoc.coll.sortMulti(coll :: LIST? OF MAP?, orderFields = [] :: LIST? OF STRING?, limit = -1 :: INTEGER?, skip = 0 :: INTEGER?) :: (LIST? OF ANY?)
 ¦apoc.coll.sortNodes(coll :: LIST? OF NODE?, prop :: STRING?) :: (LIST? OF ANY?)
 ¦apoc.coll.sortText(coll :: LIST? OF STRING?, conf = {} :: MAP?) :: (LIST? OF ANY?)
+¦apoc.coll.stdev(list :: LIST? OF NUMBER?, isBiasCorrected = true :: BOOLEAN?) :: (NUMBER?)
 ¦apoc.coll.subtract(first :: LIST? OF ANY?, second :: LIST? OF ANY?) :: (LIST? OF ANY?)
 ¦apoc.coll.sum(numbers :: LIST? OF NUMBER?) :: (FLOAT?)
 ¦apoc.coll.sumLongs(numbers :: LIST? OF NUMBER?) :: (INTEGER?)

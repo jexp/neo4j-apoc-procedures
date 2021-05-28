@@ -360,6 +360,7 @@ for the provided `label` and `uuidProperty`, in case the UUID handler is already
 ¦function¦apoc.coll.sortMulti¦apoc.coll.sortMulti(coll :: LIST? OF MAP?, orderFields = [] :: LIST? OF STRING?, limit = -1 :: INTEGER?, skip = 0 :: INTEGER?) :: (LIST? OF ANY?)¦apoc.coll.sortMulti(coll, ['^name','age'],[limit],[skip]) - sort list of maps by several sort fields (ascending with ^ prefix) and optionally applies limit and skip¦true¦
 ¦function¦apoc.coll.sortNodes¦apoc.coll.sortNodes(coll :: LIST? OF NODE?, prop :: STRING?) :: (LIST? OF ANY?)¦apoc.coll.sortNodes([nodes], 'name') sort nodes by property¦true¦
 ¦function¦apoc.coll.sortText¦apoc.coll.sortText(coll :: LIST? OF STRING?, conf = {} :: MAP?) :: (LIST? OF ANY?)¦apoc.coll.sortText(coll) sort on string based collections¦true¦
+¦function¦apoc.coll.stdev¦apoc.coll.stdev(list :: LIST? OF NUMBER?, isBiasCorrected = true :: BOOLEAN?) :: (NUMBER?)¦apoc.coll.stdev(list, isBiasCorrected) - returns the sample or population standard deviation with isBiasCorrected true or false respectively. For example apoc.coll.stdev([10, 12, 23]) return 7¦true¦
 ¦function¦apoc.coll.subtract¦apoc.coll.subtract(first :: LIST? OF ANY?, second :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.subtract(first, second) - returns unique set of first list with all elements of second list removed¦true¦
 ¦function¦apoc.coll.sum¦apoc.coll.sum(numbers :: LIST? OF NUMBER?) :: (FLOAT?)¦apoc.coll.sum([0.5,1,2.3])¦true¦
 ¦function¦apoc.coll.sumLongs¦apoc.coll.sumLongs(numbers :: LIST? OF NUMBER?) :: (INTEGER?)¦apoc.coll.sumLongs([1,3,3])¦true¦

@@ -3,6 +3,7 @@ package apoc.coll;
 import apoc.result.ListResult;
 import com.google.common.util.concurrent.AtomicDouble;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.util.Combinations;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -50,6 +51,16 @@ public class Coll {
     public GraphDatabaseService db;
 
     @Context public Transaction tx;
+
+    @UserFunction
+    @Description("apoc.coll.stdev(list, isBiasCorrected) - returns the sample or population standard deviation with isBiasCorrected true or false respectively. For example apoc.coll.stdev([10, 12, 23]) return 7")
+    public Number stdev(@Name("list") List<Number> list, @Name(value = "isBiasCorrected", defaultValue = "true") boolean isBiasCorrected) {
+        if (list == null || list.isEmpty()) return null;
+        final double stdev = new StandardDeviation(isBiasCorrected)
+                .evaluate(list.stream().mapToDouble(Number::doubleValue).toArray());
+        if ((long) stdev == stdev) return (long) stdev;
+        return stdev;
+    }
 
     @UserFunction
     @Description("apoc.coll.runningTotal(list1) - returns an accumulative array. For example apoc.coll.runningTotal([1,2,3.5]) return [1,3,6.5]")
