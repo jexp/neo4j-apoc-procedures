@@ -1,5 +1,5 @@
 ¦xref::overview/apoc.load/apoc.load.directory.adoc[apoc.load.directory icon:book[]] +
 
-`apoc.load.directory('pattern', 'urlDir', \{config}) YIELD value` - Loads list of all files in folder specified by urlDir or in import folder if urlDir string is empty or not specified
+ - Loads list of all files in folder specified by urlDir or in import folder if urlDir string is empty or not specified
 ¦label:procedure[]
 ¦label:apoc-core[]

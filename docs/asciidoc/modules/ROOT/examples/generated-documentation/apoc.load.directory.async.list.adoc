@@ -1,5 +1,5 @@
-¦xref::overview/apoc.load.directory.async/apoc.load.directory.async.list.adoc[apoc.load.directory.async.list icon:book[]] +
+¦xref::overview/apoc.load/apoc.load.directory.async.list.adoc[apoc.load.directory.async.list icon:book[]] +
 
-`apoc.load.directory.async.list() YIELD name, status, pattern, cypher, urlDir, config, error` - List of all folder listeners
+ - List of all folder listeners
 ¦label:procedure[]
 ¦label:apoc-core[]

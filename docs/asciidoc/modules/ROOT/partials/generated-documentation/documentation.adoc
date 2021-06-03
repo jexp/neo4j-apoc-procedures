@@ -1813,7 +1813,7 @@ apoc.math.minLong() \| return the minimum value a long can have
 |label:apoc-core[]
 |xref::overview/apoc.math/apoc.math.round.adoc[apoc.math.round icon:book[]]
 
-apoc.math.round(value,[prec],mode=[CEILING,FLOOR,UP,DOWN,HALF_EVEN,HALF_DOWN,HALF_UP,DOWN,UNNECESSARY])
+apoc.math.round(value,[precision],mode=['CEILING','FLOOR','UP','DOWN','HALF_EVEN','HALF_DOWN','HALF_UP','DOWN','UNNECESSARY'])
 |label:function[]
 |label:apoc-core[]
 |===
@@ -2735,7 +2735,7 @@ apoc.spatial.reverseGeocode(latitude,longitude) YIELD location, latitude, longit
 |label:apoc-core[]
 |xref::overview/apoc.spatial/apoc.spatial.sortByDistance.adoc[apoc.spatial.sortByDistance icon:book[]]
 
-apoc.spatial.sortPathsByDistance(List<Path>) sort the given paths based on the geo informations (lat/long) in ascending order
+apoc.spatial.sortByDistance(List<Path>) sort the given paths based on the geo informations (lat/long) in ascending order
 |label:procedure[]
 |label:apoc-core[]
 |===

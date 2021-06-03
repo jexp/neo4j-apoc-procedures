@@ -1,5 +1,5 @@
-¦xref::overview/apoc.load.directory.async/apoc.load.directory.async.removeAll.adoc[apoc.load.directory.async.removeAll icon:book[]] +
+¦xref::overview/apoc.load/apoc.load.directory.async.removeAll.adoc[apoc.load.directory.async.removeAll icon:book[]] +
 
-`apoc.load.directory.async.removeAll()` - Remove all folder listeners
+ - Remove all folder listeners
 ¦label:procedure[]
 ¦label:apoc-core[]

@@ -1,20 +1,20 @@
 ¦Qualified Name¦Type¦Release
-|xref::overview/apoc.load.directory.async/apoc.load.directory.async.adoc[apoc.load.directory.async.add icon:book[]]
+|xref::overview/apoc.load.directory.async/apoc.load.adoc[apoc.load.directory.async.add icon:book[]]
 
 apoc.load.directory.async.add(name, cypher, pattern, urlDir, {}) YIELD name, status, pattern, cypher, urlDir, config, error - Add or replace a folder listener with a specific name, pattern and url directory that execute the specified cypher query when an event is triggered and return listener list
 |label:procedure[]
 |label:apoc-core[]
-|xref::overview/apoc.load.directory.async/apoc.load.directory.async.adoc[apoc.load.directory.async.list icon:book[]]
+|xref::overview/apoc.load.directory.async/apoc.load.adoc[apoc.load.directory.async.list icon:book[]]
 
 apoc.load.directory.async.list() YIELD name, status, pattern, cypher, urlDir, config, error - List of all folder listeners
 |label:procedure[]
 |label:apoc-core[]
-|xref::overview/apoc.load.directory.async/apoc.load.directory.async.adoc[apoc.load.directory.async.remove icon:book[]]
+|xref::overview/apoc.load.directory.async/apoc.load.adoc[apoc.load.directory.async.remove icon:book[]]
 
 apoc.load.directory.async.remove(name) YIELD name, status, pattern, cypher, urlDir, config, error - Remove a folder listener by name and return remaining listeners, if any
 |label:procedure[]
 |label:apoc-core[]
-|xref::overview/apoc.load.directory.async/apoc.load.directory.async.adoc[apoc.load.directory.async.removeAll icon:book[]]
+|xref::overview/apoc.load.directory.async/apoc.load.adoc[apoc.load.directory.async.removeAll icon:book[]]
 
 apoc.load.directory.async.removeAll() - Remove all folder listeners
 |label:procedure[]
