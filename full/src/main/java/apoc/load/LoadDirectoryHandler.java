@@ -8,13 +8,6 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.Log;
 
-import static apoc.util.FileUtils.getDirImport;
-import static apoc.util.FileUtils.isImportUsingNeo4jConfig;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
-import static java.nio.file.WatchEvent.Kind;
-
 import java.io.File;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -30,7 +23,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
+import static apoc.util.FileUtils.getDirImport;
 import static apoc.util.FileUtils.getPathFromUrlString;
+import static apoc.util.FileUtils.isImportUsingNeo4jConfig;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+import static java.nio.file.WatchEvent.Kind;
 import static org.apache.commons.lang3.StringUtils.replaceOnce;
 
 public class LoadDirectoryHandler extends LifecycleAdapter {
@@ -73,7 +72,6 @@ public class LoadDirectoryHandler extends LifecycleAdapter {
     }
 
     public void remove(String name) {
-
         final LoadDirectoryItem loadDirectoryItem = new LoadDirectoryItem(name);
         remove(loadDirectoryItem);
     }
@@ -103,7 +101,6 @@ public class LoadDirectoryHandler extends LifecycleAdapter {
     }
 
     public void removeAll() {
-
         Set<LoadDirectoryItem> keys = new HashSet<>(storage.keySet());
         keys.forEach(this::remove);
     }
@@ -146,6 +143,9 @@ public class LoadDirectoryHandler extends LifecycleAdapter {
                     Thread.sleep(config.getInterval());
                 }
             } catch (Exception e) {
+                if (e instanceof InterruptedException) {
+                    return;
+                }
                 log.warn(String.format("Error while executing procedure with name %s . " +
                         "The status of the directory listener is changed to ERROR. " +
                         "Type `call apoc.load.directory.async.list` to more details.", item.getName()));

@@ -119,7 +119,7 @@ public class LoadDirectoryItem {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LoadDirectoryItem that = (LoadDirectoryItem) o;
-        return name.equals(that.name);
+        return Objects.equals(name, that.name);
     }
 
     @Override
