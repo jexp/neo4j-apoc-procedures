@@ -84,7 +84,7 @@ public class PeriodicTest {
         // force pre-caching the queryplan
         assertFalse(db.executeTransactionally(callList, Collections.emptyMap(), Result::hasNext));
 
-        testCall(db, "CALL apoc.periodic.submit('foo','create (:Foo { id: $id })', { id: '(╯°□°)╯︵ ┻━┻' })",
+        testCall(db, "CALL apoc.periodic.submit('foo','create (:Foo { id: $id })', {params: {id: '(╯°□°)╯︵ ┻━┻' }})",
                 (row) -> {
                     assertEquals("foo", row.get("name"));
                     assertEquals(false, row.get("done"));
