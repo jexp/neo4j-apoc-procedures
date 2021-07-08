@@ -1,0 +1,5 @@
+¦xref::overview/apoc.create/apoc.create.vPaths.adoc[apoc.create.vPaths icon:book[]] +
+
+
+¦label:procedure[]
+¦label:apoc-core[]

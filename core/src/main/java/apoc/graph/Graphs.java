@@ -71,7 +71,7 @@ public class Graphs {
         return found;
     }
 
-    @Description("apoc.graph.fromPaths(path,'name',{properties}) - creates a virtual graph object for later processing")
+    @Description("apoc.graph.fromPath(path,'name',{properties}) - creates a virtual graph object for later processing")
     @Procedure
     public Stream<VirtualGraph> fromPath(@Name("path") Path paths, @Name("name") String name, @Name("properties") Map<String,Object> properties) {
         return Stream.of(new VirtualGraph(name, paths.nodes(), paths.relationships(),properties));

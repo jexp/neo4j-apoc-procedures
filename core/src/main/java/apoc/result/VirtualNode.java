@@ -45,6 +45,10 @@ public class VirtualNode implements Node {
         this.props.putAll(node.getProperties(keys));
     }
 
+    public static VirtualNode from(Node node) {
+        return new VirtualNode(node, Iterables.asList(node.getPropertyKeys()));
+    }
+
     @Override
     public long getId() {
         return id;

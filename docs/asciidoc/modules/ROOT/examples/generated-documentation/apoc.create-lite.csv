@@ -14,6 +14,8 @@
 ¦apoc.create.uuids(count :: INTEGER?) :: (row :: INTEGER?, uuid :: STRING?)
 ¦apoc.create.vNode(label :: LIST? OF STRING?, props :: MAP?) :: (node :: NODE?)
 ¦apoc.create.vNodes(label :: LIST? OF STRING?, props :: LIST? OF MAP?) :: (node :: NODE?)
+¦apoc.create.vPath(path :: PATH?) :: (path :: PATH?)
+¦apoc.create.vPaths(paths :: LIST? OF PATH?) :: (path :: PATH?)
 ¦apoc.create.vPattern(from :: MAP?, relType :: STRING?, props :: MAP?, to :: MAP?) :: (from :: NODE?, rel :: RELATIONSHIP?, to :: NODE?)
 ¦apoc.create.vPatternFull(labelsN :: LIST? OF STRING?, n :: MAP?, relType :: STRING?, props :: MAP?, labelsM :: LIST? OF STRING?, m :: MAP?) :: (from :: NODE?, rel :: RELATIONSHIP?, to :: NODE?)
 ¦apoc.create.vRelationship(from :: NODE?, relType :: STRING?, props :: MAP?, to :: NODE?) :: (rel :: RELATIONSHIP?)

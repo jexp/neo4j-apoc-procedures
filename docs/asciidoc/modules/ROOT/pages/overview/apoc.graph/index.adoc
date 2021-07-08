@@ -35,7 +35,7 @@ apoc.graph.fromDocument(\{json}, \{config}) yield graph - transform JSON documen
 |label:apoc-core[]
 |xref::overview/apoc.graph/apoc.graph.fromPath.adoc[apoc.graph.fromPath icon:book[]]
 
-apoc.graph.fromPaths(path,'name',\{properties}) - creates a virtual graph object for later processing
+apoc.graph.fromPath(path,'name',\{properties}) - creates a virtual graph object for later processing
 |label:procedure[]
 |label:apoc-core[]
 |xref::overview/apoc.graph/apoc.graph.fromPaths.adoc[apoc.graph.fromPaths icon:book[]]

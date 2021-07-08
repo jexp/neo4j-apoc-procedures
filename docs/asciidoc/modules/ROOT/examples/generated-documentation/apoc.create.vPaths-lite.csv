@@ -1,0 +1,2 @@
+¦signature
+¦apoc.create.vPaths(paths :: LIST? OF PATH?) :: (path :: PATH?)

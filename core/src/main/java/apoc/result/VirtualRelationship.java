@@ -37,6 +37,10 @@ public class VirtualRelationship implements Relationship {
         this.type = type;
         this.props.putAll(props);
     }
+    
+    public static Relationship from(VirtualNode start, VirtualNode end, Relationship rel) {
+        return new VirtualRelationship(start, end, rel.getType()).withProperties(rel.getAllProperties());
+    }
 
     @Override
     public long getId() {

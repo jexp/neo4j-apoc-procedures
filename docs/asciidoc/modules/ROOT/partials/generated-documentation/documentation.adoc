@@ -785,6 +785,16 @@ apoc.create.vNode(['Label'], {key:value,...}) returns a virtual node
 apoc.create.vNodes(['Label'], [{key:value,...}]) returns virtual nodes
 |label:procedure[]
 |label:apoc-core[]
+|xref::overview/apoc.create/apoc.create.vPath.adoc[apoc.create.vPath icon:book[]]
+
+apoc.create.vPath
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.create/apoc.create.vPaths.adoc[apoc.create.vPaths icon:book[]]
+
+apoc.create.vPaths
+|label:procedure[]
+|label:apoc-core[]
 |xref::overview/apoc.create/apoc.create.vPattern.adoc[apoc.create.vPattern icon:book[]]
 
 apoc.create.vPattern({_labels:['LabelA'],key:value},'KNOWS',{key:value,...}, {_labels:['LabelB'],key:value}) returns a virtual pattern
@@ -1378,7 +1388,7 @@ apoc.graph.fromDocument(\{json}, \{config}) yield graph - transform JSON documen
 |label:apoc-core[]
 |xref::overview/apoc.graph/apoc.graph.fromPath.adoc[apoc.graph.fromPath icon:book[]]
 
-apoc.graph.fromPaths(path,'name',\{properties}) - creates a virtual graph object for later processing
+apoc.graph.fromPath(path,'name',\{properties}) - creates a virtual graph object for later processing
 |label:procedure[]
 |label:apoc-core[]
 |xref::overview/apoc.graph/apoc.graph.fromPaths.adoc[apoc.graph.fromPaths icon:book[]]
