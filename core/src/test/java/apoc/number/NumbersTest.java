@@ -11,6 +11,7 @@ import org.neo4j.test.rule.ImpermanentDbmsRule;
 
 import static apoc.util.TestUtil.testCall;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author inserpio
@@ -50,6 +51,7 @@ public class NumbersTest {
         testCall(db, "RETURN apoc.number.parseInt('12,345', '#,##0.00;(#,##0.00)') AS value", row -> assertEquals(new Long(12345), row.get("value")));
         testCall(db, "RETURN apoc.number.parseInt('12.345', '#,##0.00;(#,##0.00)', 'it') AS value", row -> assertEquals(new Long(12345), row.get("value")));
         testCall(db, "RETURN apoc.number.parseInt('aaa') AS value", row -> assertEquals(null, row.get("value")));
+        testCall(db, "RETURN apoc.number.parseInt(null) AS value", row -> assertNull(row.get("value")));
     }
 
     // Parse Double
@@ -61,5 +63,6 @@ public class NumbersTest {
         testCall(db, "RETURN apoc.number.parseFloat('12,345.67', '#,##0.00;(#,##0.00)') AS value", row -> assertEquals(new Double(12345.67), row.get("value")));
         testCall(db, "RETURN apoc.number.parseFloat('12.345,67', '#,##0.00;(#,##0.00)', 'it') AS value", row -> assertEquals(new Double(12345.67), row.get("value")));
         testCall(db, "RETURN apoc.number.parseFloat('aaa') AS value", row -> assertEquals(null, row.get("value")));
+        testCall(db, "RETURN apoc.number.parseFloat(null) AS value", row -> assertNull(row.get("value")));
     }
 }

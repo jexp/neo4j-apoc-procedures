@@ -1,5 +1,6 @@
 package apoc.number;
 
+import org.apache.commons.lang.StringUtils;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserFunction;
@@ -35,6 +36,9 @@ public class Numbers {
   }
 
   private Number parseNumber(@Name("text") String text, @Name(value = "pattern", defaultValue = "") String pattern, @Name(value = "lang", defaultValue = "") String lang) {
+    if (StringUtils.isBlank(text)) {
+      return null;
+    }
     try {
       return buildFormatter(pattern, lang).parse(text);
     } catch (ParseException e) {
