@@ -1,3 +1,6 @@
+apoc.bolt.execute
+apoc.bolt.load
+apoc.bolt.load.fromLocal
 apoc.cluster.graph
 apoc.config.list
 apoc.config.map
@@ -51,6 +54,10 @@ apoc.get.rels
 apoc.load.csv
 apoc.load.csvParams
 apoc.load.directory
+apoc.load.directory.async.add
+apoc.load.directory.async.list
+apoc.load.directory.async.remove
+apoc.load.directory.async.removeAll
 apoc.load.driver
 apoc.load.html
 apoc.load.jdbc
@@ -74,6 +81,10 @@ apoc.mongodb.get
 apoc.mongodb.get.byObjectId
 apoc.mongodb.insert
 apoc.mongodb.update
+apoc.monitor.ids
+apoc.monitor.kernel
+apoc.monitor.store
+apoc.monitor.tx
 apoc.nlp.aws.entities.graph
 apoc.nlp.aws.entities.stream
 apoc.nlp.aws.keyPhrases.graph

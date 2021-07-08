@@ -1,5 +1,6 @@
 package apoc.monitor;
 
+import apoc.Extended;
 import apoc.result.TransactionInfoResult;
 import org.neo4j.kernel.impl.transaction.stats.DatabaseTransactionStats;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -10,6 +11,7 @@ import org.neo4j.storageengine.api.TransactionIdStore;
 
 import java.util.stream.Stream;
 
+@Extended
 public class Transaction {
 
     @Context

@@ -1,5 +1,6 @@
 package apoc.data.email;
 
+import apoc.Extended;
 import apoc.util.Util;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -8,6 +9,7 @@ import org.neo4j.procedure.UserFunction;
 import javax.mail.internet.*;
 import java.util.Map;
 
+@Extended
 public class ExtractEmail {
 
     @UserFunction("apoc.data.email")

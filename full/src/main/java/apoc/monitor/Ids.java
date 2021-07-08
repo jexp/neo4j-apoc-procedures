@@ -1,5 +1,6 @@
 package apoc.monitor;
 
+import apoc.Extended;
 import apoc.result.IdsResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.impl.store.stats.StoreEntityCounters;
@@ -10,6 +11,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
+@Extended
 public class Ids {
 
     private static final String JMX_OBJECT_NAME = "Primitive count";

@@ -1,11 +1,13 @@
-package apoc;
-
 import apoc.util.Neo4jContainerExtension;
 import apoc.util.TestUtil;
 import org.junit.Test;
 import org.neo4j.driver.Session;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static apoc.util.TestContainerUtil.createEnterpriseDB;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -40,5 +42,9 @@ public class StartupTest {
             ex.printStackTrace();
             fail("Should not have thrown exception when trying to start Neo4j: " + ex);
         }
+    }
+
+    private List<String> sorted(List<String> signatures) {
+        return signatures.stream().sorted().collect(Collectors.toList());
     }
 }

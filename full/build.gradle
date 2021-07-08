@@ -39,11 +39,11 @@ shadowJar {
 
 dependencies {
     compile project(":core")
+    apt project(":processor")
     testCompile project(':test-utils')
 
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib"
     testCompile "org.jetbrains.kotlin:kotlin-stdlib"
-//    apt 'net.biville.florent:neo4j-sproc-compiler:1.2'  // temporarily disabled until byte[] is supported by sproc compiler
     apt group: 'org.neo4j', name: 'neo4j', version: neo4jVersionEffective   // mandatory to run @ServiceProvider based META-INF code generation
 //    compile group: 'commons-codec', name: 'commons-codec', version: '1.14'
     compile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
@@ -147,6 +147,9 @@ dependencies {
     testCompile group: 'com.google.cloud', name: 'google-cloud-storage', version: '1.92.0', {
         exclude group: 'com.google.guava', module: 'guava'
     }
+
+    compileOnly group: 'com.sun.mail', name: 'javax.mail', version: '1.6.0'
+    testCompile group: 'com.sun.mail', name: 'javax.mail', version: '1.6.0'
 
     configurations.all {
         exclude group: 'org.slf4j', module: 'slf4j-nop'

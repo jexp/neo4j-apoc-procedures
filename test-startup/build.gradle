@@ -1,0 +1,6 @@
+description = 'APOC :: Test Startup Module'
+
+dependencies {
+    testCompile project(':core')
+    testCompile project(':test-utils')
+}

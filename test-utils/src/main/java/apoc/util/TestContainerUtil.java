@@ -40,7 +40,11 @@ public class TestContainerUtil {
     }
 
     public static Neo4jContainerExtension createEnterpriseDB(boolean withLogging)  {
-        executeGradleTasks("shadowJar");
+        return createEnterpriseDB(baseDir, withLogging);
+    }
+
+    public static Neo4jContainerExtension createEnterpriseDB(File baseDir, boolean withLogging)  {
+        executeGradleTasks(baseDir, "shadowJar");
         // We define the container with external volumes
         File importFolder = new File("import");
         importFolder.mkdirs();
@@ -49,10 +53,10 @@ public class TestContainerUtil {
         String neo4jDockerImageVersion = System.getProperty("neo4jDockerImage", "neo4j:4.2.2-enterprise");
 
         // use a separate folder for mounting plugins jar - build/libs might contain other jars as well.
-        File pluginsFolder = new File("build/plugins");
+        File pluginsFolder = new File(baseDir, "build/plugins");
         pluginsFolder.mkdirs();
 
-        Collection<File> files = FileUtils.listFiles(new File("build/libs"), new WildcardFileFilter(Arrays.asList("*-all.jar", "*-core.jar")), null);
+        Collection<File> files = FileUtils.listFiles(new File(baseDir, "build/libs"), new WildcardFileFilter(Arrays.asList("*-all.jar", "*-core.jar")), null);
         for (File file: files) {
             try {
                 FileUtils.copyFileToDirectory(file, pluginsFolder);
@@ -100,7 +104,7 @@ public class TestContainerUtil {
         return neo4jContainer;
     }
 
-    public static void executeGradleTasks(String... tasks) {
+    public static void executeGradleTasks(File baseDir, String... tasks) {
         try (ProjectConnection connection = GradleConnector.newConnector()
                 .forProjectDirectory(baseDir)
                 .useBuildDistribution()
@@ -123,6 +127,10 @@ public class TestContainerUtil {
 
             buildLauncher.run();
         }
+    }
+
+    public static void executeGradleTasks(String... tasks) {
+        executeGradleTasks(baseDir, tasks);
     }
 
     public static void testCall(Session session, String call, Map<String,Object> params, Consumer<Map<String, Object>> consumer) {
