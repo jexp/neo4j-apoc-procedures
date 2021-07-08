@@ -4,6 +4,7 @@ import apoc.ApocSettings;
 import apoc.graph.Graphs;
 import apoc.util.JsonUtil;
 import apoc.util.TestUtil;
+import apoc.util.Util;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -377,6 +378,25 @@ public class ExportJsonTest {
                     assertEquals("json", r.get("format"));
                 });
         assertFileEquals(filename);
+    }
+    
+    @Test
+    public void testExportWgsPoint() {
+        db.executeTransactionally("CREATE (p:Position {place: point({latitude: 12.78, longitude: 56.7, height: 1.1})})");
+
+        TestUtil.testCall(db, "CALL apoc.export.json.query($query, null, {stream: true}) YIELD data RETURN data",
+                map("query", "MATCH (p:Position) RETURN p.place as place"),
+                (r) -> {
+                    String data = (String) r.get("data");
+                    Map<String, Object> map = Util.fromJson(data, Map.class);
+                    Map<String, Object> place = (Map<String, Object>) map.get("place");
+                    assertEquals(12.78D, place.get("latitude"));
+                    assertEquals(56.7D, place.get("longitude"));
+                    assertEquals(1.1D, place.get("height"));
+                });
+        
+        db.executeTransactionally("MATCH (n:Position) DETACH DELETE n");
+        
     }
 
     private void assertResults(String filename, Map<String, Object> r, final String source) {

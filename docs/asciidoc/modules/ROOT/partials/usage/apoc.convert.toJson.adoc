@@ -83,5 +83,5 @@ RETURN apoc.convert.toJson(collect(a)+b+c+d+e)
 [opts="header",cols="1"]
 |===
 | Output
-|  "[{"id":"23","type":"node","labels":["User"],"properties":{"born":"2015-07-04T19:32:24","name":"Adam","place":{"crs":"wgs-84","latitude":33.46789,"longitude":13.1,"height":null},"age":42,"male":true,"kids":["Sam","Anna","Grace"]}},{"id":"24","type":"node","labels":["User"],"properties":{"name":"Jim","age":42}},{"id":"25","type":"node","labels":["User"],"properties":{"age":12}},{"id":"26","type":"node","labels":["User"]},{"id":"27","type":"node","properties":{"pippo":"pluto"}}]"
+|  "[{"id":"23","type":"node","labels":["User"],"properties":{"born":"2015-07-04T19:32:24","name":"Adam","place":{"crs":"wgs-84","latitude":13.1,"longitude":33.46789,"height":null},"age":42,"male":true,"kids":["Sam","Anna","Grace"]}},{"id":"24","type":"node","labels":["User"],"properties":{"name":"Jim","age":42}},{"id":"25","type":"node","labels":["User"],"properties":{"age":12}},{"id":"26","type":"node","labels":["User"]},{"id":"27","type":"node","properties":{"pippo":"pluto"}}]"
 |===

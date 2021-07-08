@@ -91,14 +91,14 @@ public class PointSerializer extends JsonSerializer<Point> {
         private Double longitude;
         private Double height;
 
-        public PointWgs(String crs, Double latitude, Double longitude, Double height) {
+        public PointWgs(String crs, Double longitude, Double latitude, Double height) {
             this.crs = crs;
             this.latitude = latitude;
             this.longitude = longitude;
             this.height = height;
         }
 
-        public PointWgs(String crs, Double latitude, Double longitude) {
+        public PointWgs(String crs, Double longitude, Double latitude) {
             this.crs = crs;
             this.latitude = latitude;
             this.longitude = longitude;

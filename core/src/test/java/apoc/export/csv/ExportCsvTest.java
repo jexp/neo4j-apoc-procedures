@@ -3,6 +3,7 @@ package apoc.export.csv;
 import apoc.ApocSettings;
 import apoc.graph.Graphs;
 import apoc.util.TestUtil;
+import apoc.util.Util;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -378,6 +379,23 @@ public class ExportCsvTest {
                 });
         db.executeTransactionally("MATCH (d:Document) DETACH DELETE d");
 
+    }
+
+    @Test
+    public void testExportWgsPoint() {
+        db.executeTransactionally("CREATE (p:Position {place: point({latitude: 12.78, longitude: 56.7, height: 1.1})})");
+
+        TestUtil.testCall(db, "CALL apoc.export.csv.query($query, null, {quotes: 'none', stream: true}) YIELD data RETURN data",
+                map("query", "MATCH (p:Position) RETURN p.place as place"),
+                (r) -> {
+                    String data = (String) r.get("data");
+                    Map<String, Object> place = Util.fromJson(data.split(System.lineSeparator())[1], Map.class);
+                    assertEquals(12.78D, place.get("latitude"));
+                    assertEquals(56.7D, place.get("longitude"));
+                    assertEquals(1.1D, place.get("height"));
+                });
+
+        db.executeTransactionally("MATCH (n:Position) DETACH DELETE n");
     }
 
     private Consumer<Result> getAndCheckStreamingMetadataQueryMatchAddress(StringBuilder sb)

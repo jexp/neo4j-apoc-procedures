@@ -91,7 +91,7 @@ public class ConvertJsonTest {
                     "kids", List.of("Sam", "Anna", "Grace"),
                     "born", "2015-07-04T19:32:24",
                     "place", Map.of(
-                            "latitude", 56.7, "longitude", 12.78, "crs", "wgs-84-3d", "height", 1.1
+                            "latitude", 12.78, "longitude", 56.7, "crs", "wgs-84-3d", "height", 1.1
                     ));
             assertJsonNode(nodeOne, "0", users, expectedMap);
 

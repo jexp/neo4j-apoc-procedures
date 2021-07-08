@@ -17,6 +17,10 @@ e.g:
 |LocalDateTime | 2018-10-10T00:00
 |===
 
+Note that, to perform a correct Point serialization, it is not recommended to export a point with coordinates x,y and crs: 'wgs-84',
+for example `point({x: 56.7, y: 12.78, crs: 'wgs-84'})`. Otherwise, the point will be exported with longitude and latitude (and heigth) instead of x and y (and z)
+
+
 [[export-graphml-available-procedures]]
 == Available Procedures
 
