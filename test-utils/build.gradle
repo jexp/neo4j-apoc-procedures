@@ -10,8 +10,7 @@ dependencies {
     compile group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jVersionEffective, classifier: "tests"
     compile group: 'org.neo4j', name: 'neo4j-io', version: neo4jVersionEffective, classifier: "tests"
 
-    // there is a compatibility problem between the Guava Library used by HDFS, Google Cloud Storage and Reflections; the only version that fits for all is the following
-    compile group: 'com.google.guava', name: 'guava', version: '20.0'
+    compile group: 'com.google.guava', name: 'guava', version: '27.0-jre'
 
     compile group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: '4.2.0'
 
@@ -23,9 +22,9 @@ dependencies {
         exclude group: 'org.apache.hive', module: 'hive-service'
     }
 
-    compile group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: '2.7.5', withoutServers
-    compile group: 'org.apache.hadoop', name: 'hadoop-common', version: '2.7.5', withoutServers
-    compile group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: '2.7.5', withoutServers
+    compile group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: '3.3.1', withoutServers
+    compile group: 'org.apache.hadoop', name: 'hadoop-common', version: '3.3.1', withoutServers
+    compile group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: '3.3.1', withoutServers
 
     compile group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: '4.2.0'
     compile group: 'org.jetbrains', name: 'annotations', version: "17.0.0"

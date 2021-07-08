@@ -111,8 +111,8 @@ dependencies {
 
     testCompile group: 'org.apache.hive', name: 'hive-jdbc', version: '1.2.2', withoutServers
 
-    compileOnly group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: '2.7.5', withoutServers
-    compileOnly group: 'org.apache.hadoop', name: 'hadoop-common', version: '2.7.5', withoutServers
+    compileOnly group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: '3.3.1', withoutServers
+    compileOnly group: 'org.apache.hadoop', name: 'hadoop-common', version: '3.3.1', withoutServers
 
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
     // explicit update comomns.io version
@@ -134,8 +134,9 @@ dependencies {
         exclude group: 'com.google.guava', module: 'guava'
     }
 
-    // there is a compatibility problem between the Guava Library used by HDFS, Google Cloud Storage and Reflections; the only version that fits for all is the following
-    compile group: 'com.google.guava', name: 'guava', version: '20.0'
+    compile group: 'com.google.guava', name: 'guava', version: '27.0-jre'
+
+    compile group: 'xerces', name: 'xercesImpl', version: '2.12.1'
 
     configurations.all {
         exclude group: 'org.slf4j', module: 'slf4j-nop'

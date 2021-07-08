@@ -5,7 +5,7 @@ import apoc.result.NodeResult;
 import apoc.result.RelationshipResult;
 import apoc.util.TestUtil;
 import apoc.util.Util;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.BeforeClass;
