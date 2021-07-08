@@ -82,7 +82,7 @@ public class ExportXls {
         apocConfig.checkWriteAllowed(c);
         try (Transaction tx = db.beginTx();
              OutputStream out = getOutputStream(fileName, null);
-             SXSSFWorkbook wb = new SXSSFWorkbook(100)) {
+             SXSSFWorkbook wb = new SXSSFWorkbook(-1)) {
 
             XlsExportConfig config = new XlsExportConfig(configMap);
             ProgressInfo progressInfo = new ProgressInfo(fileName, source, "xls");

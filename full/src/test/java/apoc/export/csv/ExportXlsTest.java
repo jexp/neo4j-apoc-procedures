@@ -5,6 +5,7 @@ import apoc.export.xls.ExportXls;
 import apoc.graph.Graphs;
 import apoc.util.TestUtil;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -13,6 +14,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.helpers.collection.Iterables;
 import org.neo4j.internal.helpers.collection.Iterators;
@@ -23,7 +25,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static apoc.util.MapUtil.map;
 import static org.junit.Assert.assertEquals;
@@ -69,6 +75,39 @@ public class ExportXlsTest {
                 map("file", fileName),
                 (r) -> assertResults(fileName, r, "graph"));
         assertExcelFileForGraph(fileName);
+    }
+
+    @Test
+    public void testExportGraphXlsWithMoreThan100Nodes()  {
+        db.executeTransactionally("UNWIND range(1,200) as range CREATE (n:Test)");
+        String fileName = "graph.xlsx";
+        TestUtil.testCall(db, "CALL apoc.graph.fromDB('test',{}) yield graph " +
+                        "CALL apoc.export.xls.graph(graph, $file,null) " +
+                        "YIELD nodes, relationships, properties, file, source,format, time " +
+                        "RETURN *",
+                map("file", fileName),
+                (r) -> assertResults(fileName, r, "graph", 208L, 2L, 206));
+        assertExcelFileForGraph(fileName);
+        db.executeTransactionally("MATCH (n:Test) DETACH DELETE n");
+    }
+
+    @Test
+    public void testExportGraphXlsWithCustomHeaderAndMoreThan100Nodes() {
+        String nodeId = "customNode";
+        String relId = "customRel";
+        String startNodeId = "customStart";
+        String endNodeId = "customEnd";
+        db.executeTransactionally("UNWIND range(1,200) as range CREATE (n:Test)");
+        String fileName = "graph.xlsx";
+        TestUtil.testCall(db, "CALL apoc.graph.fromDB('test',{}) yield graph " +
+                        "CALL apoc.export.xls.graph(graph, $file, $conf) " +
+                        "YIELD nodes, relationships, properties, file, source,format, time " +
+                        "RETURN *",
+                map("file", fileName, "conf", map("headerNodeId", nodeId,
+                        "headerRelationshipId", relId, "headerStartNodeId", startNodeId, "headerEndNodeId", endNodeId)),
+                (r) -> assertResults(fileName, r, "graph", 208L, 2L, 206));
+        assertExcelFileForGraph(fileName, nodeId, List.of(relId, startNodeId, endNodeId));
+        db.executeTransactionally("MATCH (n:Test) DETACH DELETE n");
     }
 
     @Test
@@ -125,17 +164,25 @@ public class ExportXlsTest {
     }
 
 
-    private void assertResults(String fileName, Map<String, Object> r, final String source) {
-        assertEquals(8L, r.get("nodes")); // we're exporting nodes with multiple label multiple times
+    private void assertResults(String fileName, Map<String, Object> r, final String source, long expectedNodes, long expectedRels, int expectedNodesSource) {
+        assertEquals(expectedNodes, r.get("nodes")); // we're exporting nodes with multiple label multiple times
         assertEquals(2L, r.get("relationships"));
         assertEquals(25L, r.get("properties"));
-        assertEquals(source + ": nodes(6), rels(2)", r.get("source"));
+        assertEquals(source + String.format(": nodes(%s), rels(%s)", expectedNodesSource, expectedRels), r.get("source"));
         assertEquals(fileName, r.get("file"));
         assertEquals("xls", r.get("format"));
         assertTrue("Should get time greater than 0", ((long) r.get("time")) >= 0);
     }
 
+    private void assertResults(String fileName, Map<String, Object> r, final String source) {
+        assertResults(fileName, r, source, 8L, 2L, 6);
+    }
+
     private void assertExcelFileForGraph(String fileName) {
+        assertExcelFileForGraph(fileName, "<nodeId>", List.of("<relationshipId>", "<startNodeId>", "<endNodeId>"));
+    }
+
+    private void assertExcelFileForGraph(String fileName, String headerNode, List<String> headerRel) {
         try (InputStream inp = new FileInputStream(new File(directory, fileName)); Transaction tx = db.beginTx()) {
             Workbook wb = WorkbookFactory.create(inp);
 
@@ -146,6 +193,25 @@ public class ExportXlsTest {
                 long numberOfNodes = Iterators.count(tx.findNodes(label));
                 Sheet sheet = wb.getSheet(label.name());
                 assertEquals(numberOfNodes, sheet.getLastRowNum());
+                final Set<String> actual = Iterators.stream(sheet.getRow(0).cellIterator()).map(Cell::getStringCellValue).collect(Collectors.toSet());
+                final Set<String> expected = StreamSupport.stream(tx.getAllNodes().spliterator(), false)
+                        .filter(node -> node.hasLabel(label))
+                        .flatMap(i -> StreamSupport.stream(i.getPropertyKeys().spliterator(), false))
+                        .collect(Collectors.toSet());
+                expected.add(headerNode);
+                assertEquals(expected, actual);
+            }
+            for (RelationshipType relType: tx.getAllRelationshipTypesInUse()) {
+                long numberOfRels = tx.getAllRelationships().stream().filter(rel -> rel.isType(relType)).count();
+                Sheet sheet = wb.getSheet(relType.name());
+                assertEquals(numberOfRels, sheet.getLastRowNum());
+                final Set<String> actual = Iterators.stream(sheet.getRow(0).cellIterator()).map(Cell::getStringCellValue).collect(Collectors.toSet());
+                final Set<String> expected = StreamSupport.stream(tx.getAllRelationships().spliterator(), false)
+                        .filter(rel -> rel.isType(relType))
+                        .flatMap(i -> StreamSupport.stream(i.getPropertyKeys().spliterator(), false))
+                        .collect(Collectors.toSet());
+                expected.addAll(headerRel);
+                assertEquals(expected, actual);
             }
             tx.commit();
         } catch (IOException|InvalidFormatException e) {
