@@ -1,2 +1,2 @@
 ¦type¦qualified name¦signature¦description
-¦function¦apoc.convert.fromJsonMap¦apoc.convert.fromJsonMap(map :: STRING?, path =  :: STRING?) :: (MAP?)¦apoc.convert.fromJsonMap('{"a":42,"b":"foo","c":[1,2,3]}'[,'json-path'])
+¦function¦apoc.convert.fromJsonMap¦apoc.convert.fromJsonMap(map :: STRING?, path =  :: STRING?) :: (MAP?)¦apoc.convert.fromJsonMap('{"a":42,"b":"foo","c":[1,2,3]}'[,'json-path', 'path-options'])

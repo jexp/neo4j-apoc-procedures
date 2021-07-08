@@ -1,2 +1,2 @@
 ¦type¦qualified name¦signature¦description
-¦function¦apoc.convert.fromJsonList¦apoc.convert.fromJsonList(list :: STRING?, path =  :: STRING?) :: (LIST? OF ANY?)¦apoc.convert.fromJsonList('[1,2,3]'[,'json-path'])
+¦function¦apoc.convert.fromJsonList¦apoc.convert.fromJsonList(list :: STRING?, path =  :: STRING?) :: (LIST? OF ANY?)¦apoc.convert.fromJsonList('[1,2,3]'[,'json-path', 'path-options'])

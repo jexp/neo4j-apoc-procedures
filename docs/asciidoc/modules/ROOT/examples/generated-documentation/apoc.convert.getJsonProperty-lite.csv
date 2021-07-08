@@ -1,2 +1,2 @@
 ¦signature
-¦apoc.convert.getJsonProperty(node :: NODE?, key :: STRING?, path =  :: STRING?) :: (ANY?)
+¦apoc.convert.getJsonProperty(node :: NODE?, key :: STRING?, path =  :: STRING?, pathOptions = null :: LIST? OF STRING?) :: (ANY?)

@@ -1,10 +1,10 @@
 ¦signature
 ¦apoc.convert.setJsonProperty(node :: NODE?, key :: STRING?, value :: ANY?) :: VOID
 ¦apoc.convert.toTree(paths :: LIST? OF PATH?, lowerCaseRels = true :: BOOLEAN?, config = {} :: MAP?) :: (value :: MAP?)
-¦apoc.convert.fromJsonList(list :: STRING?, path =  :: STRING?) :: (LIST? OF ANY?)
-¦apoc.convert.fromJsonMap(map :: STRING?, path =  :: STRING?) :: (MAP?)
-¦apoc.convert.getJsonProperty(node :: NODE?, key :: STRING?, path =  :: STRING?) :: (ANY?)
-¦apoc.convert.getJsonPropertyMap(node :: NODE?, key :: STRING?, path =  :: STRING?) :: (MAP?)
+¦apoc.convert.fromJsonList(list :: STRING?, path =  :: STRING?, pathOptions = null :: LIST? OF STRING?) :: (LIST? OF ANY?)
+¦apoc.convert.fromJsonMap(map :: STRING?, path =  :: STRING?, pathOptions = null :: LIST? OF STRING?) :: (MAP?)
+¦apoc.convert.getJsonProperty(node :: NODE?, key :: STRING?, path =  :: STRING?, pathOptions = null :: LIST? OF STRING?) :: (ANY?)
+¦apoc.convert.getJsonPropertyMap(node :: NODE?, key :: STRING?, path =  :: STRING?, pathOptions = null :: LIST? OF STRING?) :: (MAP?)
 ¦apoc.convert.toBoolean(bool :: ANY?) :: (BOOLEAN?)
 ¦apoc.convert.toBooleanList(list :: ANY?) :: (LIST? OF ANY?)
 ¦apoc.convert.toFloat(object :: ANY?) :: (FLOAT?)

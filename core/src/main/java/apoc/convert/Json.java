@@ -82,9 +82,9 @@ public class Json {
     public org.neo4j.graphdb.GraphDatabaseService db;
 
     @UserFunction("apoc.json.path")
-    @Description("apoc.json.path('{json}','json-path')")
-    public Object path(@Name("json") String json, @Name(value = "path",defaultValue = "$") String path) {
-        return JsonUtil.parse(json,path,Object.class);
+    @Description("apoc.json.path('{json}' [,'json-path' , 'path-options'])")
+    public Object path(@Name("json") String json, @Name(value = "path",defaultValue = "$") String path, @Name(value = "pathOptions", defaultValue = "null") List<String> pathOptions) {
+        return JsonUtil.parse(json, path, Object.class, pathOptions);
     }
     @UserFunction("apoc.convert.toJson")
     @Description("apoc.convert.toJson([1,2,3]) or toJson({a:42,b:\"foo\",c:[1,2,3]}) or toJson(NODE/REL/PATH)")
@@ -107,29 +107,29 @@ public class Json {
     }
 
     @UserFunction// ("apoc.json.getJsonProperty")
-    @Description("apoc.convert.getJsonProperty(node,key[,'json-path']) - converts serialized JSON in property back to original object")
-    public Object getJsonProperty(@Name("node") Node node, @Name("key") String key,@Name(value = "path",defaultValue = "") String path) {
+    @Description("apoc.convert.getJsonProperty(node,key[,'json-path', 'path-options']) - converts serialized JSON in property back to original object")
+    public Object getJsonProperty(@Name("node") Node node, @Name("key") String key,@Name(value = "path",defaultValue = "") String path, @Name(value = "pathOptions", defaultValue = "null") List<String> pathOptions) {
         String value = (String) node.getProperty(key, null);
-        return JsonUtil.parse(value, path, Object.class);
+        return JsonUtil.parse(value, path, Object.class, pathOptions);
     }
 
     @UserFunction// ("apoc.json.getJsonPropertyMap")
-    @Description("apoc.convert.getJsonPropertyMap(node,key[,'json-path']) - converts serialized JSON in property back to map")
-    public Map<String,Object> getJsonPropertyMap(@Name("node") Node node, @Name("key") String key,@Name(value = "path",defaultValue = "") String path) {
+    @Description("apoc.convert.getJsonPropertyMap(node,key[,'json-path', 'path-options']) - converts serialized JSON in property back to map")
+    public Map<String,Object> getJsonPropertyMap(@Name("node") Node node, @Name("key") String key,@Name(value = "path",defaultValue = "") String path, @Name(value = "pathOptions", defaultValue = "null") List<String> pathOptions) {
         String value = (String) node.getProperty(key, null);
-        return JsonUtil.parse(value, path, Map.class);
+        return JsonUtil.parse(value, path, Map.class, pathOptions);
     }
 
     @UserFunction
-    @Description("apoc.convert.fromJsonMap('{\"a\":42,\"b\":\"foo\",\"c\":[1,2,3]}'[,'json-path'])")
-    public Map<String,Object> fromJsonMap(@Name("map") String value,@Name(value = "path",defaultValue = "") String path) {
-        return JsonUtil.parse(value, path, Map.class);
+    @Description("apoc.convert.fromJsonMap('{\"a\":42,\"b\":\"foo\",\"c\":[1,2,3]}'[,'json-path', 'path-options'])")
+    public Map<String,Object> fromJsonMap(@Name("map") String value,@Name(value = "path",defaultValue = "") String path, @Name(value = "pathOptions", defaultValue = "null") List<String> pathOptions) {
+        return JsonUtil.parse(value, path, Map.class, pathOptions);
     }
 
     @UserFunction
-    @Description("apoc.convert.fromJsonList('[1,2,3]'[,'json-path'])")
-    public List<Object> fromJsonList(@Name("list") String value, @Name(value = "path",defaultValue = "") String path) {
-        return JsonUtil.parse(value, path, List.class);
+    @Description("apoc.convert.fromJsonList('[1,2,3]'[,'json-path', 'path-options'])")
+    public List<Object> fromJsonList(@Name("list") String value, @Name(value = "path",defaultValue = "") String path, @Name(value = "pathOptions", defaultValue = "null") List<String> pathOptions) {
+        return JsonUtil.parse(value, path, List.class, pathOptions);
     }
 
     @Procedure("apoc.convert.toTree")

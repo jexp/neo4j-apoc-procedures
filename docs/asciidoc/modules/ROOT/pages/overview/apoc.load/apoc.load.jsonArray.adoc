@@ -14,7 +14,7 @@ apoc.load.jsonArray('url') YIELD value - load array from JSON URL (e.g. web-api)
 
 [source]
 ----
-apoc.load.jsonArray(url :: STRING?, path =  :: STRING?) :: (value :: ANY?)
+apoc.load.jsonArray(url :: STRING?, path =  :: STRING?, config = {} :: MAP?) :: (value :: ANY?)
 ----
 
 == Input parameters
@@ -23,6 +23,7 @@ apoc.load.jsonArray(url :: STRING?, path =  :: STRING?) :: (value :: ANY?)
 | Name | Type | Default 
 |url|STRING?|null
 |path|STRING?|
+|config|MAP?|{}
 |===
 
 == Output parameters

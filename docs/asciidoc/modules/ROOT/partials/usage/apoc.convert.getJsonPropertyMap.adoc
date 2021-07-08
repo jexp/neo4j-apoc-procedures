@@ -18,3 +18,34 @@ RETURN apoc.convert.getJsonPropertyMap(p, "json") AS output;
 | Output
 | {a: [1, 2, 3]}
 |===
+
+
+Moreover, we can customize the Json path options, adding as third parameter (`pathOptions`) a list of strings,
+where the strings are based on https://javadoc.io/doc/com.jayway.jsonpath/json-path/2.4.0/com/jayway/jsonpath/Option.html[Enum<Option>].
+The default value is `["SUPPRESS_EXCEPTIONS", "DEFAULT_PATH_LEAF_TO_NULL"]`. Note that we can also insert `[]`, that is "without options".
+So, with a `(n:JsonPathNode {prop: '{"columns":{"col2":{"_id":"772col2"}}}'})` we can execute (with default pathOptions):
+
+[source, cypher]
+----
+MATCH (n:JsonPathNode) RETURN apoc.convert.getJsonPropertyMap(n, 'prop', '$.columns.col2') AS output;
+----
+
+.Results
+[opts="header"]
+|===
+| output
+| { "_id": "772col2" }
+|===
+
+or, with custom path options:
+
+[source, cypher]
+----
+MATCH (n:JsonPathNode) RETURN apoc.convert.getJsonPropertyMap(n, 'prop', '$.columns.col2', ['ALWAYS_RETURN_LIST']) AS path
+----
+
+.Results
+[opts="header"]
+|===
+| Failed to invoke function `apoc.convert.getJsonPropertyMap`: Caused by: com.fasterxml.jackson.databind.exc.MismatchedInputException: Cannot deserialize instance of `java.util.LinkedHashMap<java.lang.Object,java.lang.Object>` out of START_ARRAY token at [Source: UNKNOWN; line: -1, column: -1]
+|===

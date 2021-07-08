@@ -31,6 +31,49 @@ RETURN apoc.convert.fromJsonList('[
 | ["Neo4j", "Graph Data Science Library", "Bloom"]
 |===
 
+Moreover, we can customize the Json path options, adding as third parameter (`pathOptions`) a list of strings,
+where the strings are based on https://javadoc.io/doc/com.jayway.jsonpath/json-path/2.4.0/com/jayway/jsonpath/Option.html[Enum<Option>].
+The default value is `["SUPPRESS_EXCEPTIONS", "DEFAULT_PATH_LEAF_TO_NULL"]`. Note that we can also insert `[]`, that is "without options".
+So we can execute (with default pathOptions):
+
+[source, cypher]
+----
+RETURN apoc.convert.fromJsonList('{ "columns": {
+      "col2": {
+        "_id": "772col2"
+      }
+    }
+}', '$..columns') AS output;
+----
+
+.Results
+[opts="header"]
+|===
+| output
+| [ {"col2": { "_id": "772col2" }}, null, null ]
+|===
+
+or, with custom path options:
+
+[source, cypher]
+----
+RETURN apoc.convert.fromJsonList('{ "columns": {
+      "col2": {
+        "_id": "772col2"
+      }
+    }
+}', '$..columns', ['ALWAYS_RETURN_LIST']) AS output;
+----
+
+.Results
+[opts="header"]
+|===
+| output
+| [ {"col2": { "_id": "772col2" }} ]
+|===
+
+
+
 If we try to convert a non-list structure, we'll get an exception.
 For example:
 

@@ -1,2 +1,2 @@
 ¦type¦qualified name¦signature¦description
-¦function¦apoc.json.path¦apoc.json.path(json :: STRING?, path = $ :: STRING?) :: (ANY?)¦apoc.json.path('\{json}','json-path')
+¦function¦apoc.json.path¦apoc.json.path(json :: STRING?, path = $ :: STRING?) :: (ANY?)¦apoc.json.path('\{json}' [,'json-path' , 'path-options'])

@@ -8,7 +8,7 @@
 ¦apoc.load.jdbcParams(jdbc :: STRING?, sql :: STRING?, params :: LIST? OF ANY?, config = {} :: MAP?) :: (row :: MAP?)
 ¦apoc.load.jdbcUpdate(jdbc :: STRING?, query :: STRING?, params = [] :: LIST? OF ANY?, config = {} :: MAP?) :: (row :: MAP?)
 ¦apoc.load.json(url :: STRING?, path =  :: STRING?, config = {} :: MAP?) :: (value :: MAP?)
-¦apoc.load.jsonArray(url :: STRING?, path =  :: STRING?) :: (value :: ANY?)
+¦apoc.load.jsonArray(url :: STRING?, path =  :: STRING?, config = {} :: MAP?) :: (value :: ANY?)
 ¦apoc.load.jsonParams(urlOrKey :: STRING?, headers :: MAP?, payload :: STRING?, path =  :: STRING?, config = {} :: MAP?) :: (value :: MAP?)
 ¦apoc.load.ldap(connection :: ANY?, search :: MAP?) :: (entry :: MAP?)
 ¦apoc.load.xls(url :: STRING?, selector :: STRING?, config = {} :: MAP?) :: (lineNo :: INTEGER?, list :: LIST? OF ANY?, map :: MAP?)

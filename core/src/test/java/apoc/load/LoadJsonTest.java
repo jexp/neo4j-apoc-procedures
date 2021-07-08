@@ -9,15 +9,20 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Header;
 import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.internal.helpers.collection.Iterators;
 import org.neo4j.test.rule.DbmsRule;
 import org.neo4j.test.rule.ImpermanentDbmsRule;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static apoc.ApocConfig.*;
+import static apoc.convert.ConvertJsonTest.EXPECTED_AS_PATH_LIST;
+import static apoc.convert.ConvertJsonTest.EXPECTED_PATH;
+import static apoc.convert.ConvertJsonTest.EXPECTED_PATH_WITH_NULLS;
 import static apoc.util.MapUtil.map;
 import static apoc.util.TestUtil.testCall;
 import static apoc.util.TestUtil.testResult;
@@ -101,6 +106,36 @@ public class LoadJsonTest {
                     assertEquals(map("foo",asList(1L,2L,3L)), row.get("value"));
                 });
     }
+    
+    @Test
+    public void testLoadJsonWithPathOptions() throws Exception {
+        URL url = ClassLoader.getSystemResource("columns.json");
+
+        // -- load.json
+        testResult(db, "CALL apoc.load.json($url, '$..columns')", map("url", url.toString()),
+                (res) -> assertEquals(EXPECTED_PATH_WITH_NULLS, Iterators.asList(res.columnAs("value"))));
+
+        testResult(db, "CALL apoc.load.json($url, '$..columns', $config)", 
+                map("url", url.toString(), "config", map("pathOptions", Collections.emptyList())),
+                (res) -> assertEquals(EXPECTED_PATH, Iterators.asList(res.columnAs("value"))));
+
+        testResult(db, "CALL apoc.load.json($url, '$..columns', $config)", 
+                map("url", url.toString(), "config", map("pathOptions", List.of("AS_PATH_LIST"))),
+                (res) -> assertEquals(List.of(Map.of("result", EXPECTED_AS_PATH_LIST)), Iterators.asList(res.columnAs("value"))));
+
+        // -- load.jsonArray
+        testResult(db, "CALL apoc.load.jsonArray($url, '$..columns')", map("url", url.toString()),
+                (res) -> assertEquals(EXPECTED_PATH_WITH_NULLS, Iterators.asList(res.columnAs("value"))));
+        
+        testResult(db, "CALL apoc.load.jsonArray($url, '$..columns', $config)",
+                map("url", url.toString(), "config", map("pathOptions", Collections.emptyList())),
+                (res) -> assertEquals(EXPECTED_PATH, Iterators.asList(res.columnAs("value"))));
+        
+        testResult(db, "CALL apoc.load.jsonArray($url, '$..columns', $config)",
+                map("url", url.toString(), "config", map("pathOptions", List.of("AS_PATH_LIST"))),
+                (res) -> assertEquals(List.of(EXPECTED_AS_PATH_LIST), Iterators.asList(res.columnAs("value"))));
+    }
+    
     @Test public void testLoadJsonArrayPath() throws Exception {
 		URL url = ClassLoader.getSystemResource("map.json");
 		testCall(db, "CALL apoc.load.jsonArray($url,'$.foo')",map("url",url.toString()), // 'file:map.json' YIELD value RETURN value

@@ -1,2 +1,2 @@
 ¦type¦qualified name¦signature¦description
-¦function¦apoc.convert.getJsonProperty¦apoc.convert.getJsonProperty(node :: NODE?, key :: STRING?, path =  :: STRING?) :: (ANY?)¦apoc.convert.getJsonProperty(node,key[,'json-path']) - converts serialized JSON in property back to original object
+¦function¦apoc.convert.getJsonProperty¦apoc.convert.getJsonProperty(node :: NODE?, key :: STRING?, path =  :: STRING?) :: (ANY?)¦apoc.convert.getJsonProperty(node,key[,'json-path', 'path-options']) - converts serialized JSON in property back to original object

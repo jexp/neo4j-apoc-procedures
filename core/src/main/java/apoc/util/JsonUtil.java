@@ -14,14 +14,17 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.spatial.Point;
-import org.neo4j.procedure.Name;
 import org.neo4j.values.storable.DurationValue;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.temporal.Temporal;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Spliterators;
 import java.util.stream.Stream;
@@ -34,9 +37,10 @@ import static apoc.ApocConfig.apocConfig;
  * @since 04.05.16
  */
 public class JsonUtil {
+    private final static Option[] defaultJsonPathOptions = { Option.DEFAULT_PATH_LEAF_TO_NULL, Option.SUPPRESS_EXCEPTIONS };
+    
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    public static final Object TOMB = new Object();
-    private static final Configuration JSON_PATH_CONFIG;
+    public static final String PATH_OPTIONS_ERROR_MESSAGE = "Invalid pathOptions. The allowed values are: " + EnumSet.allOf(Option.class);
     static {
         OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         OBJECT_MAPPER.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false);
@@ -51,11 +55,6 @@ public class JsonUtil {
         module.addSerializer(Temporal.class, new TemporalSerializer());
         module.addSerializer(DurationValue.class, new DurationValueSerializer());
         OBJECT_MAPPER.registerModule(module);
-        JSON_PATH_CONFIG = Configuration.builder()
-                .options(Option.DEFAULT_PATH_LEAF_TO_NULL, Option.SUPPRESS_EXCEPTIONS)
-                .jsonProvider(new JacksonJsonProvider(OBJECT_MAPPER))
-                .mappingProvider(new JacksonMappingProvider(OBJECT_MAPPER))
-                .build();
     }
 
     static class NonClosingStream extends FilterInputStream {
@@ -69,10 +68,28 @@ public class JsonUtil {
         }
     }
 
+    private static Configuration getJsonPathConfig(List<String> options) {
+        try {
+            Option[] opts = options == null ? defaultJsonPathOptions : options.stream().map(Option::valueOf).toArray(Option[]::new);
+            return Configuration.builder()
+                    .options(opts)
+                    .jsonProvider(new JacksonJsonProvider(OBJECT_MAPPER))
+                    .mappingProvider(new JacksonMappingProvider(OBJECT_MAPPER))
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException(PATH_OPTIONS_ERROR_MESSAGE, e);
+        }
+    }
+    
     public static Stream<Object> loadJson(String url, Map<String,Object> headers, String payload) {
         return loadJson(url,headers,payload,"", true);
     }
-    public static Stream<Object> loadJson(String url, Map<String,Object> headers, String payload, String path, boolean failOnError) {
+    
+    private static Stream<Object> loadJson(String url, Map<String,Object> headers, String payload, String path, boolean failOnError) {
+        return loadJson(url, headers, payload, path, failOnError, null);
+    }
+
+    public static Stream<Object> loadJson(String url, Map<String,Object> headers, String payload, String path, boolean failOnError, List<String> options) {
         try {
             url = Util.getLoadUrlByConfigFile("json",url, "url").orElse(url);
             apocConfig().checkReadAllowed(url);
@@ -81,7 +98,7 @@ public class JsonUtil {
             JsonParser parser = OBJECT_MAPPER.getFactory().createParser(input);
             MappingIterator<Object> it = OBJECT_MAPPER.readValues(parser, Object.class);
             Stream<Object> stream = StreamSupport.stream(Spliterators.spliteratorUnknownSize(it, 0), false);
-            return (path==null||path.isEmpty()) ? stream  : stream.map((value) -> JsonPath.parse(value,JSON_PATH_CONFIG).read(path));
+            return StringUtils.isBlank(path) ? stream  : stream.map((value) -> JsonPath.parse(value, getJsonPathConfig(options)).read(path));
         } catch (IOException e) {
             String u = Util.cleanUrl(url);
             if(!failOnError)
@@ -96,12 +113,16 @@ public class JsonUtil {
     }
 
     public static <T> T parse(String json, String path, Class<T> type) {
+        return parse(json, path, type, null);
+    }
+    
+    public static <T> T parse(String json, String path, Class<T> type, List<String> options) {
         if (json==null || json.isEmpty()) return null;
         try {
             if (path == null || path.isEmpty()) {
                 return OBJECT_MAPPER.readValue(json, type);
             }
-            return JsonPath.parse(json,JSON_PATH_CONFIG).read(path, type);
+            return JsonPath.parse(json, getJsonPathConfig(options)).read(path, type);
         } catch (IOException e) {
             throw new RuntimeException("Can't convert " + json + " to "+type.getSimpleName()+" with path "+path, e);
         }

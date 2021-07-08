@@ -20,22 +20,22 @@ apoc.convert.toTree([paths],[lowerCaseRels=true], [config]) creates a stream of 
 |label:apoc-core[]
 |xref::overview/apoc.convert/apoc.convert.fromJsonList.adoc[apoc.convert.fromJsonList icon:book[]]
 
-apoc.convert.fromJsonList('[1,2,3]'[,'json-path'])
+apoc.convert.fromJsonList('[1,2,3]'[,'json-path', 'path-options'])
 |label:function[]
 |label:apoc-core[]
 |xref::overview/apoc.convert/apoc.convert.fromJsonMap.adoc[apoc.convert.fromJsonMap icon:book[]]
 
-apoc.convert.fromJsonMap('{"a":42,"b":"foo","c":[1,2,3]}'[,'json-path'])
+apoc.convert.fromJsonMap('{"a":42,"b":"foo","c":[1,2,3]}'[,'json-path', 'path-options'])
 |label:function[]
 |label:apoc-core[]
 |xref::overview/apoc.convert/apoc.convert.getJsonProperty.adoc[apoc.convert.getJsonProperty icon:book[]]
 
-apoc.convert.getJsonProperty(node,key[,'json-path']) - converts serialized JSON in property back to original object
+apoc.convert.getJsonProperty(node,key[,'json-path', 'path-options']) - converts serialized JSON in property back to original object
 |label:function[]
 |label:apoc-core[]
 |xref::overview/apoc.convert/apoc.convert.getJsonPropertyMap.adoc[apoc.convert.getJsonPropertyMap icon:book[]]
 
-apoc.convert.getJsonPropertyMap(node,key[,'json-path']) - converts serialized JSON in property back to map
+apoc.convert.getJsonPropertyMap(node,key[,'json-path', 'path-options']) - converts serialized JSON in property back to map
 |label:function[]
 |label:apoc-core[]
 |xref::overview/apoc.convert/apoc.convert.toBoolean.adoc[apoc.convert.toBoolean icon:book[]]

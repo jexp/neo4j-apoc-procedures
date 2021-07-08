@@ -31,3 +31,47 @@ All of the operators and options for specifying JSON paths are included in the n
 | [start:end]             | Array slice operator                                            | `$.items[0:5]` - retrieve the first through fifth items in the array
 | [?(<expression>)]       | Filter expression. Expression must evaluate to a boolean value. | `$.items[?(@.is_answered == true)]` - retrieve items where the is_answered field is true
 |===
+
+
+Moreover, we can customize the Json path options, adding the config {pathOptions: `LIST OF STRINGS`},
+where the strings are based on https://javadoc.io/doc/com.jayway.jsonpath/json-path/2.4.0/com/jayway/jsonpath/Option.html[Enum<Option>].
+The default value is `["SUPPRESS_EXCEPTIONS", "DEFAULT_PATH_LEAF_TO_NULL"]`. Note that we can also insert `[]`, that is "without options".
+So with the following json:
+
+[source,json]
+----
+{ "columns": {
+      "col2": {
+        "_id": "772col2"
+      }
+    }
+}
+----
+
+we can execute (with default `pathOptions`):
+
+[source, cypher]
+----
+CALL apoc.load.json($url, '$..columns');
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| [ {"col2": { "_id": "772col2" }}, null, null ]
+|===
+
+or, with custom path options:
+
+[source, cypher]
+----
+CALL apoc.load.json($url, '$..columns', ['ALWAYS_RETURN_LIST']);
+----
+
+.Results
+[opts="header"]
+|===
+| Output
+| [ {"col2": { "_id": "772col2" }} ]
+|===

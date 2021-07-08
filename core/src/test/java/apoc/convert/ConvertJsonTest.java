@@ -4,8 +4,10 @@ import apoc.util.TestUtil;
 import apoc.util.Util;
 import junit.framework.TestCase;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.assertj.core.util.Arrays;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,6 +23,7 @@ import java.util.Map;
 
 import static apoc.convert.Json.NODE;
 import static apoc.convert.Json.RELATIONSHIP;
+import static apoc.util.JsonUtil.PATH_OPTIONS_ERROR_MESSAGE;
 import static apoc.util.MapUtil.map;
 import static apoc.util.TestUtil.testCall;
 import static apoc.util.TestUtil.testResult;
@@ -28,12 +31,95 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
 public class ConvertJsonTest {
-
+    private static final Map<String, Object> EXPECTED_COLUMNS_MAP = Map.of("row", Map.of("poiType", "Governorate", "poi", 772L), "col2", Map.of("_id", "772col2"));
+    // json extracted from issue #1445
+    private static final String JSON = "{\"columns\":{\"row\":{\"poiType\":\"Governorate\",\"poi\":772},\"col2\":{\"_id\":\"772col2\"}}}";
+    
+    public static final List<Map<String, Object>> EXPECTED_PATH = List.of(EXPECTED_COLUMNS_MAP);
+    public static final List<Object> EXPECTED_PATH_WITH_NULLS = Arrays.asList(new Object[]{ EXPECTED_COLUMNS_MAP, null, null, null });
+    public static final List<String> EXPECTED_AS_PATH_LIST = List.of("$['columns']");
+    
+    
     @Rule
     public DbmsRule db = new ImpermanentDbmsRule();
 
 	@Before public void setUp() throws Exception {
         TestUtil.registerProcedure(db, Json.class);
+    }
+    
+	@After 
+    public void clear() {
+        db.executeTransactionally("MATCH (n) DETACH DELETE n;");
+    }
+    
+    @Test
+    public void testJsonPath() {
+        // -- json.path
+        testCall(db, "RETURN apoc.json.path($json, '$..columns') AS path", Map.of("json", JSON),
+                (row) -> assertEquals(EXPECTED_PATH_WITH_NULLS, row.get("path")));
+
+        testCall(db, "RETURN apoc.json.path($json, '$..columns', ['AS_PATH_LIST']) AS path", Map.of("json", JSON),
+                (row) -> assertEquals(EXPECTED_AS_PATH_LIST, row.get("path")));
+
+        testCall(db, "RETURN apoc.json.path($json, '$..columns', []) AS path", Map.of("json", JSON),
+                (row) -> assertEquals(EXPECTED_PATH, row.get("path")));
+
+        // -- convert.fromJsonList
+        testCall(db, "RETURN apoc.convert.fromJsonList($json, '$..columns') AS path", Map.of("json", JSON),
+                (row) -> assertEquals(EXPECTED_PATH_WITH_NULLS, row.get("path")));
+
+        testCall(db, "RETURN apoc.convert.fromJsonList($json, '$..columns', ['AS_PATH_LIST']) AS path", Map.of("json", JSON),
+                (row) -> assertEquals(EXPECTED_AS_PATH_LIST, row.get("path")));
+
+        testCall(db, "RETURN apoc.convert.fromJsonList($json, '$..columns', []) AS path", Map.of("json", JSON),
+                (row) -> assertEquals(List.of(EXPECTED_COLUMNS_MAP), row.get("path")));
+
+
+        db.executeTransactionally("CREATE (n:JsonPathNode {prop: $prop})", Map.of("prop", JSON));
+        
+        // -- convert.getJsonProperty
+        testCall(db, "MATCH (n:JsonPathNode) RETURN apoc.convert.getJsonProperty(n, 'prop', '$..columns') AS path", Map.of("json", JSON),
+                (row) -> assertEquals(EXPECTED_PATH_WITH_NULLS, row.get("path")));
+
+        testCall(db, "MATCH (n:JsonPathNode) RETURN apoc.convert.getJsonProperty(n, 'prop', '$..columns', ['AS_PATH_LIST']) AS path", Map.of("json", JSON),
+                (row) -> assertEquals(EXPECTED_AS_PATH_LIST, row.get("path")));
+
+        testCall(db, "MATCH (n:JsonPathNode) RETURN apoc.convert.getJsonProperty(n, 'prop', '$..columns', []) AS path", Map.of("json", JSON),
+                (row) -> assertEquals(List.of(EXPECTED_COLUMNS_MAP), row.get("path")));
+
+        // -- invalid option
+        try {
+            testCall(db, "RETURN apoc.json.path($json, '$..columns', ['INVALID']) AS path", Map.of("json", JSON),
+                    (row) -> fail("Should fail because of invalid pathOptions"));
+        } catch (RuntimeException e) {
+            assertTrue(ExceptionUtils.getStackTrace(e).contains(PATH_OPTIONS_ERROR_MESSAGE));
+        }
+    }
+    
+    @Test
+    public void testJsonPathWithMapFunctions() {
+        // apoc.convert.getJsonPropertyMap and apoc.convert.fromJsonMap must fail with "ALWAYS_RETURN_LIST" because should return a Map.
+        final Map<String, String> expectedMap = Map.of("_id", "772col2");
+        final String expectedError = "com.fasterxml.jackson.databind.exc.MismatchedInputException: Cannot deserialize instance of `java.util.LinkedHashMap<java.lang.Object,java.lang.Object>` out of START_ARRAY token";
+
+        testCall(db, "RETURN apoc.convert.fromJsonMap($json, '$.columns.col2') AS path", Map.of("json", JSON),
+                (row) -> assertEquals(expectedMap, row.get("path")));
+        try {
+            testCall(db, "RETURN apoc.convert.fromJsonMap($json, '$.columns.col2', ['ALWAYS_RETURN_LIST']) AS path", Map.of("json", JSON),
+                    (row) -> fail("Should fail because of MismatchedInputException"));
+        } catch (QueryExecutionException e) {
+            assertTrue(e.getMessage().contains(expectedError));
+        }
+        
+        db.executeTransactionally("CREATE (n:JsonPathNode {prop: $prop})", Map.of("prop", JSON));
+        testCall(db, "MATCH (n:JsonPathNode) RETURN apoc.convert.getJsonPropertyMap(n, 'prop', '$.columns.col2') AS path", Map.of("json", JSON),
+                (row) -> assertEquals(expectedMap, row.get("path")));
+        try {
+            testCall(db, "MATCH (n:JsonPathNode) RETURN apoc.convert.getJsonPropertyMap(n, 'prop', '$.columns.col2', ['ALWAYS_RETURN_LIST']) AS path", Map.of("json", JSON),
+                    (row) -> fail("Should fail because of MismatchedInputException"));
+        } catch (QueryExecutionException e) {
+            assertTrue(e.getMessage().contains(expectedError));
+        }
     }
 
     @Test public void testToJsonList() throws Exception {

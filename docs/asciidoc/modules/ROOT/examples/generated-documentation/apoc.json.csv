@@ -1,6 +1,6 @@
 ¦Qualified Name¦Type¦Release
 |xref::overview/apoc.json/apoc.json.adoc[apoc.json.path icon:book[]]
 
-apoc.json.path('\{json}','json-path')
+apoc.json.path('\{json}' [,'json-path' , 'path-options'])
 |label:function[]
 |label:apoc-core[]
