@@ -80,6 +80,7 @@ Besides the file you can pass in a config map:
 | ignore | [] | which columns to ignore
 | nullValues | [] | which values to treat as null, e.g. `['na',false]`
 | mapping | {} | per field mapping, entry key is field name, .e.g `{years:{....}` see below
+| failOnError | boolean | true | fail if error encountered while parsing CSV
 |===
 
 .mapping config for each field in the `mapping` entry
@@ -138,6 +139,20 @@ NOTE: in previous releases we've had `apoc.load.xmlSimple`.
 This is now deprecated and has been superseded by `apoc.load.xml(url, [xPath], [config], true)`.Simple XML Format
 
 See the following usage-examples for the procedures.
+
+=== Error handling
+
+You can use `failOnError` configuration to handle the result in case of incorrect url or csv.
+For example, with the help of the `apoc.when` procedure, you can return `nothingToList` and `nothingToMap` as list and map result, with incorrect url:
+[source,cypher]
+----
+CALL apoc.load.csv("MY_CSV_URL", {failOnError:false})
+YIELD list, map
+WITH list, map
+call apoc.do.when(list = [], "return 'nothingToList' as list, 'nothingToMap' as map", "return list, map", {list: list, map: map})
+YIELD value
+RETURN value["list"], value["map"]
+----
 
 
 

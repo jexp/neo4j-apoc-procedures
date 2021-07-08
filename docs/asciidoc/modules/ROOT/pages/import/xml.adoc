@@ -277,6 +277,22 @@ The Neo4j Browser visualization below shows the imported graph:
 
 image::apoc.load.xml.local.books.svg[]
 
+
+You can use `failOnError` configuration to handle the result in case of incorrect url or xml.
+For example, with the help of the `apoc.when` procedure, you can return `nothingToDo` as result with incorrect url:
+
+[source,cypher]
+----
+CALL apoc.load.xml("MY_XML_URL", '', {failOnError:false})
+YIELD value
+WITH value as valueXml
+call apoc.do.when(valueXml["_type"] is null, "return 'nothingToDo' as result", "return valueXml as result", {valueXml: valueXml})
+YIELD value
+UNWIND value["result"] as result
+RETURN result
+----
+
+
 [[load-xml-examples-simple-xml-format]]
 === Import from GitHub
 

@@ -183,6 +183,20 @@ The Neo4j Browser visualization below shows the imported graph:
 
 image::apoc.load.json.local.file.svg[]
 
+You can use `failOnError` configuration to handle the result in case of incorrect url or json.
+For example, with the help of the `apoc.when` procedure, you can return `nothingToDo` as result with incorrect url:
+
+[source,cypher]
+----
+CALL apoc.load.json("MY_JSON_URL", null, {failOnError:false})
+YIELD value
+WITH collect(value) as values
+call apoc.do.when(values = [], "return 'nothingToDo' as result", "return values as result", {values: values})
+YIELD value
+UNWIND value["result"] as result
+RETURN result
+----
+
 [[load-json-examples-stackoverflow]]
 === Import from StackOverflow API
 
