@@ -750,10 +750,7 @@ public class    Meta {
         for(String entityName : metaData.keySet()) {
             Map<String, MetaResult> entityData = metaData.get(entityName);
             Map<String, Object> entityProperties = new LinkedHashMap<>();
-            if (entityData.isEmpty()) {
-                continue;
-            }
-            boolean isRelationship = true;
+            boolean isRelationship = metaStats.relTypesCount.containsKey(entityName);
             for (String entityDataKey : entityData.keySet()) {
                 MetaResult metaResult = entityData.get(entityDataKey);
                 if (!metaResult.elementType.equals("relationship")) {

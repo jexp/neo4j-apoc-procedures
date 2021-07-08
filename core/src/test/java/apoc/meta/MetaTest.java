@@ -437,6 +437,20 @@ public class MetaTest {
                     assertEquals(1L, rel2.get("count"));
                 });
     }
+    
+    @Test
+    public void testMetaSchemaWithSmallSampleAndRelationships() {
+        final List<String> labels = List.of("Other", "Foo");
+        db.executeTransactionally("CREATE (:Foo), (:Other)-[:REL_0]->(:Other), (:Other)-[:REL_1]->(:Other)<-[:REL_2 {baz: 'baa'}]-(:Other), (:Other {alpha: 'beta'}), (:Other {foo:'bar'})-[:REL_3]->(:Other)");
+        testCall(db, "CALL apoc.meta.schema({sample: 2})",
+                (row) -> ((Map<String, Map<String, Object>>) row.get("value")).forEach((key, value) -> {
+                    if (labels.contains(key)) {
+                        assertEquals("node", value.get("type"));
+                    } else {
+                        assertEquals("relationship", value.get("type"));
+                    }
+                }));
+    }
 
     @Test
     public void testSubGraphNoLimits() throws Exception {
