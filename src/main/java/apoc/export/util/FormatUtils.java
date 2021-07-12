@@ -5,9 +5,11 @@ import apoc.util.Util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.spatial.Point;
+import org.neo4j.values.storable.DurationValue;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -83,7 +85,21 @@ public class FormatUtils {
         if (value instanceof Point) {
             return formatPoint((Point) value);
         }
+        if (value instanceof DurationValue) {
+            return formatDurationValue((DurationValue) value);
+        }
         return value.toString();
+    }
+
+    public static String formatDurationValue(DurationValue value) {
+        StringBuilder str = new StringBuilder().append("P");
+        str.append(value.get(ChronoUnit.MONTHS)).append('M');
+        str.append(value.get(ChronoUnit.DAYS)).append('D');
+        str.append('T');
+        str.append(value.get(ChronoUnit.SECONDS));
+        str.append(".");
+        str.append(value.get(ChronoUnit.NANOS)).append('S');
+        return str.toString();
     }
 
     public static String formatPoint(Point value) {

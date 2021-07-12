@@ -89,6 +89,9 @@ public class ExportCsvTest {
     private static File directory = new File("target/import");
     private static MiniDFSCluster miniDFSCluster;
 
+    private static final String EXPECTED_QUERY_DURATION_IN_SECONDS = String.format("durationInSeconds%n" +
+            "P0M0DT32735.353000000S%n");
+
     static { //noinspection ResultOfMethodCallIgnored
         directory.mkdirs();
     }
@@ -114,6 +117,21 @@ public class ExportCsvTest {
 
     private String readFile(String fileName) {
         return TestUtil.readFileToString(new File(directory, fileName));
+    }
+
+    @Test
+    public void testExportQueryCsvForDurationInSeconds() throws Exception {
+        String fileName = "query.csv";
+        String query = "RETURN duration.inSeconds(localtime('12:34:56.789'),localtime('21:40:32.142')) as durationInSeconds";
+        TestUtil.testCall(db, "CALL apoc.export.csv.query({query},{file},{quotes:'none'})",
+                map("file", fileName, "query", query),
+                (r) -> {
+                    assertTrue("Should get statement",r.get("source").toString().contains("statement: cols(1)"));
+                    assertEquals(fileName, r.get("file"));
+                    assertEquals("csv", r.get("format"));
+
+                });
+        assertEquals(EXPECTED_QUERY_DURATION_IN_SECONDS, readFile(fileName));
     }
 
     @Test
