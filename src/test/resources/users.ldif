@@ -1,0 +1,76 @@
+version: 1
+dn: dc=neo4j,dc=test
+objectClass: domain
+objectClass: top
+dc: neo4j
+
+dn: ou=Groups,dc=neo4j,dc=test
+objectClass: organizationalUnit
+objectClass: top
+ou: Groups
+
+dn: ou=Users,dc=neo4j,dc=test
+objectClass: organizationalUnit
+objectClass: top
+ou: Users
+
+dn: cn=The Architect,ou=Users,dc=neo4j,dc=test
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: The Architect
+sn: Architect
+uid: architect1
+userPassword: ICreatedTheMatrix
+
+dn: cn=Agent Smith,ou=Users,dc=neo4j,dc=test
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Agent Smith
+sn: Smith
+givenName: Agent
+uid: agentsmith
+userPassword: IHateThisPlace
+
+dn: cn=Neo,ou=Users,dc=neo4j,dc=test
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Neo
+givenName: Thomas
+sn: Anderson
+uid: neo1
+userPassword: ThereIsNoSpoon
+
+dn: cn=Morpheus,ou=Users,dc=neo4j,dc=test
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Morpheus
+sn: Bluepill
+uid: morpheus1
+userPassword: YouThinkThatsAirYoureBreathing
+
+dn: cn=Machines,ou=Groups,dc=neo4j,dc=test
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: Machines
+description: In the beginning, there was man. And for a time, it was good.
+ But humanity's so-called civil societies soon fell victim to vanity and
+ corruption. Then man made the machine in his own likeness. Thus did man
+ become the architect of his own demise.
+uniqueMember: cn=Agent Smith,ou=Machines,dc=neo4j,dc=test
+uniqueMember: cn=The Architect,ou=Machines,dc=neo4j,dc=test
+
+dn: cn=Humans,ou=Groups,dc=neo4j,dc=test
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: Humans
+description: What is The Matrix?
+uniqueMember: cn=Neo,ou=Users,dc=neo4j,dc=test
+uniqueMember: cn=Morpheus,ou=Users,dc=neo4j,dc=test

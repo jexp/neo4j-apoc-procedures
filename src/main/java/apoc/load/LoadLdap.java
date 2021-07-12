@@ -1,205 +1,171 @@
 package apoc.load;
 
-import apoc.ApocConfiguration;
-import com.novell.ldap.*;
-
-
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
+import apoc.Description;
+import apoc.load.util.LdapUtil;
+import apoc.load.util.LoadLdapConfig;
+import org.apache.directory.api.ldap.model.cursor.SearchCursor;
+import org.apache.directory.api.ldap.model.entry.Attribute;
+import org.apache.directory.api.ldap.model.entry.Entry;
+import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
+import org.apache.directory.api.ldap.model.message.Response;
+import org.apache.directory.api.ldap.model.message.SearchRequest;
+import org.apache.directory.api.ldap.model.message.SearchResultDone;
+import org.apache.directory.api.ldap.model.message.SearchResultEntry;
+import org.apache.directory.api.ldap.model.message.controls.PagedResults;
+import org.apache.directory.ldap.client.api.LdapConnection;
+import org.apache.directory.ldap.client.api.LdapConnectionPool;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.logging.Log;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static apoc.load.util.LdapUtil.buildSearch;
+import static apoc.load.util.LdapUtil.getConnectionPool;
+import static apoc.load.util.LdapUtil.rangedRetrievalEntryHandler;
+
 public class LoadLdap {
+    @Context
+    public Log log;
 
-    @Procedure(name = "apoc.load.ldap", mode = Mode.READ)
-    @Description("apoc.load.ldap(\"key\" or {connectionMap},{searchMap}) Load entries from an ldap source (yield entry)")
-    public Stream<LDAPResult> ldapQuery(@Name("connection") final Object conn, @Name("search") final Map<String,Object> search) {
+    @Context
+    public GraphDatabaseService db;
 
-        LDAPManager mgr = new LDAPManager(getConnectionMap(conn));
-
-        return mgr.executeSearch(search);
-    }
-
-    public static Map<String, Object> getConnectionMap(Object conn) {
-        if (conn instanceof String) {
-            //String value = "ldap.forumsys.com cn=read-only-admin,dc=example,dc=com password";
-            Object value = ApocConfiguration.get("loadldap").get(conn.toString() + ".config");
-            // format <ldaphost:port> <logindn> <loginpw>
-            if (value == null) throw new RuntimeException("No apoc.loadldap."+conn+".config ldap access configuration specified");
-            Map<String, Object> config = new HashMap<>();
-            String[] sConf = ((String) value).split(" ");
-            config.put("ldapHost", sConf[0]);
-            config.put("loginDN", sConf[1]);
-            config.put("loginPW", sConf[2]);
-
-            return config;
-
+    @Procedure(name = "apoc.load.ldap", deprecatedBy = "apoc.load.ldapurl")
+    @Description("apoc.load.ldap({connectionMap},{searchMap}) Load entries from an ldap source (yield entry)")
+    public Stream<LDAPResult> ldapQuery(@Name("connection") final Object conn, @Name("search") final Map<String,Object> search) throws LdapInvalidDnException {
+        LoadLdapConfig compatConfig;
+        if (conn instanceof Map) {
+            // old style config with Map of server connection parameters
+            compatConfig = LoadLdapConfig.compatConfig((Map<String, Object>) conn, search);
+        } else if (conn instanceof String) {
+            // old style config with String representing a ApocConfiguration key
+            compatConfig = LoadLdapConfig.compatConfig((String) conn, search);
         } else {
-            return (Map<String,Object> ) conn;
+            throw new RuntimeException("Cannot comprehend configuration parameters");
         }
-
+        return executePagedSearch(compatConfig);
     }
 
-    public static class LDAPManager {
-        private static final String LDAP_HOST_P = "ldapHost";
-        private static final String LDAP_LOGIN_DN_P = "loginDN";
-        private static final String LDAP_LOGIN_PW_P = "loginPW";
-        private static final String SEARCH_BASE_P = "searchBase";
-        private static final String SEARCH_SCOPE_P = "searchScope";
-        private static final String SEARCH_FILTER_P = "searchFilter";
-        private static final String SEARCH_ATTRIBUTES_P = "attributes";
+    @Procedure(name = "apoc.load.ldapurl")
+    @Description("apoc.load.ldap(config) YIELD row - run an LDAP query from an LDAP URL")
+    public Stream<LDAPResult> ldap(@Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        LoadLdapConfig ldapConfig = new LoadLdapConfig(config);
+        return executePagedSearch(ldapConfig);
+    }
 
-        private static final String SCOPE_BASE = "SCOPE_BASE";
-        private static final String SCOPE_ONE = "SCOPE_ONE";
-        private static final String SCOPE_SUB = "SCOPE_SUB";
+    /**
+     * Executes a paged LDAP search with a default of 100-entry page size. All of the results are
+     * collected before being passed to the EntryListIterator which does the transformations into
+     * KV pairs.
+     * To more completely handle Active Directory servers, checking for ranged retrievals of
+     * attribute values is performed. By default, AD sets this to 1500 values. If this is the
+     * case, the attribute values are also paged before being returned to the original attribute
+     * See https://ldapwiki.com/wiki/LDAP_SERVER_RANGE_OPTION_OID for more details.
+     *
+     * @param ldapConfig Parameters to pass onto the connector
+     * @return Stream of LDAPResults representing the search results
+     */
+    private Stream<LDAPResult> executePagedSearch(LoadLdapConfig ldapConfig) {
+        final String RANGE_RETRIEVAL_OID = "1.2.840.113556.1.4.802";
+        final String PAGED_SEARCH_OID = "1.2.840.113556.1.4.319";
+        List<Entry> allEntries = new ArrayList<>();
 
-        private int ldapPort;
-        private int ldapVersion = LDAPConnection.LDAP_V3;
-        private String ldapHost;
-        private String loginDN;
-        private String password;
-        private LDAPConnection lc;
-        private List<String> attributeList;
+        try {
+            // Use connection pooling to support future possible searches with range retrievals
+            LdapConnectionPool pool = getConnectionPool(ldapConfig);
+            LdapConnection connection = pool.getConnection();
+            boolean hasRangeRetrieval = connection.getSupportedControls().contains(RANGE_RETRIEVAL_OID);
+            if (log.isDebugEnabled())
+                log.debug("Server has ranged retrieval control: " + hasRangeRetrieval);
 
-        public LDAPManager(Map<String, Object> connParms) {
+            if (log.isDebugEnabled())
+                log.debug("Beginning paged LDAP search");
+            SearchRequest req = buildSearch(ldapConfig, null, log);
+            boolean hasMoreResults = true;
 
-            String sLdapHostPort = (String) connParms.get(LDAP_HOST_P);
-            if (sLdapHostPort.indexOf(":") > -1) {
-                this.ldapHost = sLdapHostPort.substring(0, sLdapHostPort.indexOf(":"));
-                this.ldapPort = Integer.parseInt(sLdapHostPort.substring(sLdapHostPort.indexOf(":") + 1));
-            } else {
-                this.ldapHost = sLdapHostPort;
-                this.ldapPort = 389; // default
-            }
-
-            this.loginDN = (String) connParms.get(LDAP_LOGIN_DN_P);
-            this.password = (String) connParms.get(LDAP_LOGIN_PW_P);
-
-        }
-
-        public Stream<LDAPResult> executeSearch(Map<String, Object> search) {
-            try {
-                Iterator<Map<String, Object>> supplier = new SearchResultsIterator(doSearch(search), attributeList);
-                Spliterator<Map<String, Object>> spliterator = Spliterators.spliteratorUnknownSize(supplier, Spliterator.ORDERED);
-                return StreamSupport.stream(spliterator, false).map(LDAPResult::new).onClose(() -> closeIt(lc));
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            }
-        }
-
-        public LDAPSearchResults doSearch(Map<String, Object> search) {
-            // parse search parameters
-            String searchBase = (String) search.get(SEARCH_BASE_P);
-            String searchFilter = (String) search.get(SEARCH_FILTER_P);
-            String sScope = (String) search.get(SEARCH_SCOPE_P);
-            attributeList = (List<String>) search.get(SEARCH_ATTRIBUTES_P);
-            if (attributeList == null) attributeList = new ArrayList<>();
-            int searchScope = LDAPConnection.SCOPE_SUB;
-            if (sScope.equals(SCOPE_BASE)) {
-                searchScope = LDAPConnection.SCOPE_BASE;
-            } else if (sScope.equals(SCOPE_ONE)) {
-                searchScope = LDAPConnection.SCOPE_ONE;
-            } else if (sScope.equals(SCOPE_SUB)) {
-                searchScope = LDAPConnection.SCOPE_SUB;
-            } else {
-                throw new RuntimeException("Invalid scope:" + sScope + ". value scopes are SCOPE_BASE, SCOPE_ONE and SCOPE_SUB");
-            }
-
-            // getting an ldap connection
-            try {
-                lc = getConnection();
-                // execute query
-                LDAPSearchConstraints cons = new LDAPSearchConstraints();
-                cons.setMaxResults(0); // no limit
-                LDAPSearchResults searchResults = null;
-                if (attributeList == null || attributeList.size() == 0) {
-                    searchResults = lc.search(searchBase, searchScope, searchFilter, null, false, cons);
-                } else {
-                    searchResults = lc.search(searchBase, searchScope, searchFilter, attributeList.toArray(new String[0]), false, cons);
+            while (hasMoreResults) {
+                try (SearchCursor searchCursor = connection.search(req)) {
+                    while (searchCursor.next()) {
+                        Response resp = searchCursor.get();
+                        if (resp instanceof SearchResultEntry) {
+                            Entry resultEntry = ((SearchResultEntry) resp).getEntry();
+                            if (hasRangeRetrieval) {
+                                LdapConnection extra = pool.getConnection();
+                                resultEntry = rangedRetrievalEntryHandler(resultEntry, extra, log);
+                                pool.releaseConnection(extra);
+                            }
+                            allEntries.add(resultEntry);
+                        }
+                    }
+                    SearchResultDone done = searchCursor.getSearchResultDone();
+                    PagedResults hasPaged = (PagedResults) done.getControl(PAGED_SEARCH_OID);
+                    if ( (null != hasPaged) && (hasPaged.getCookie().length > 0) ) {
+                        if (log.isDebugEnabled())
+                            log.debug("Iterating over the next LDAP search page");
+                        req = buildSearch(ldapConfig, hasPaged.getCookie(), log);
+                        hasMoreResults = true;
+                    } else {
+                        hasMoreResults = false;
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-                return searchResults;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
             }
+            pool.releaseConnection(connection);
+            if (log.isDebugEnabled())
+                log.debug(String.format("Finished paged LDAP search: %d entries", allEntries.size()));
+
+            Iterator<Map<String, Object>> supplier = new EntryListIterator(
+                    allEntries.iterator(),
+                    ldapConfig.getLdapUrl().getAttributes(),
+                    log);
+            Spliterator<Map<String, Object>> spliterator = Spliterators.spliteratorUnknownSize(supplier, Spliterator.ORDERED);
+            return StreamSupport.stream(spliterator, false).map(LDAPResult::new).onClose(pool::close);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error connecting to server: " + e);
         }
-
-        private LDAPEntry read(String dn) throws LDAPException, UnsupportedEncodingException {
-            if (dn == null) return null;
-            LDAPEntry r = null;
-            op("read start for dn: " + dn);
-            LDAPConnection lc = getConnection();
-            r = lc.read(dn);
-            closeIt(lc);
-            // op( r.toString());
-            op("read end");
-            return r;
-
-        }
-
-        private LDAPSchema getSchema() throws LDAPException, UnsupportedEncodingException {
-            LDAPSchema r = null;
-            LDAPConnection lc = getConnection();
-            r = lc.fetchSchema(lc.getSchemaDN());
-            closeIt(lc);
-            //op( r.toString());
-
-            return r;
-        }
-
-        public static void closeIt(LDAPConnection lc) {
-            try {
-                lc.disconnect();
-            } catch (Exception e) {
-                // ignore
-                e.printStackTrace();
-            }
-        }
-
-        private LDAPConnection getConnection() throws LDAPException, UnsupportedEncodingException {
-//        LDAPSocketFactory ssf;
-//        Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
-            // String path ="C:\\j2sdk1.4.2_09\\jre\\lib\\security\\cacerts";
-            //op("the trustStore: " + System.getProperty("javax.net.ssl.trustStore"));
-            // System.setProperty("javax.net.ssl.trustStore", path);
-//        op(" reading the strustStore: " + System.getProperty("javax.net.ssl.trustStore"));
-//        ssf = new LDAPJSSESecureSocketFactory();
-//        LDAPConnection.setSocketFactory(ssf);
-
-
-            LDAPConnection lc = new LDAPConnection();
-            lc.connect(ldapHost, ldapPort);
-
-            // bind to the server
-            lc.bind(ldapVersion, loginDN, password.getBytes("UTF8"));
-            // tbd
-            // LDAPConnection pooling here?
-            //
-
-
-            return lc;
-        }
-
-        private void op(String s) {
-            System.out.println("LDAPManager:>" + s);
-        }
-
     }
-    private static class SearchResultsIterator implements Iterator<Map<String, Object>> {
-        private final LDAPSearchResults lsr;
-        private final List<String> attributes;
-        private Map<String,Object> map;
-        public SearchResultsIterator(LDAPSearchResults lsr, List<String> attributes) {
 
-            this.lsr = lsr;
+    /**
+     * Executes a paged LDAP search with a default of 100-entry page size. All of the results are
+     * collected before being passed to the EntryListIterator which does the transformations into
+     * KV pairs.
+     * To more completely handle Active Directory servers, checking for ranged retrievals of
+     * attribute values is performed. By default, AD sets this to 1500 values. If this is the
+     * case, the attribute values are also paged before being returned to the original attribute
+     * See https://ldapwiki.com/wiki/LDAP_SERVER_RANGE_OPTION_OID for more details.
+     *
+     * @param url LDAP URL formatted according to RFC 2255
+     * @param config Parameters to pass onto the connector
+     * @return Stream of LDAPResults representing the search results
+     */
+    private Stream<LDAPResult> executePagedSearch(String url, Map<String, Object> config) {
+        LoadLdapConfig ldapConfig = new LoadLdapConfig(config, url);
+        return this.executePagedSearch(ldapConfig);
+    }
+
+    private static class EntryListIterator implements Iterator<Map<String, Object>> {
+        private final Iterator<Entry> entries;
+        private final List<String> attributes;
+        private final Log log;
+        private Map<String, Object> map;
+
+        public EntryListIterator(Iterator<Entry> entries, List<String> attributes, Log log) {
+            this.entries = entries;
             this.attributes = attributes;
+            this.log = log;
             this.map = get();
         }
 
@@ -210,61 +176,71 @@ public class LoadLdap {
 
         @Override
         public Map<String, Object> next() {
-            Map<String,Object> current = this.map;
+            Map<String, Object> current = this.map;
             this.map = get();
             return current;
         }
 
         public Map<String, Object> get() {
-            if (handleEndOfResults()) return null;
-            try {
-                Map<String, Object> entry = new LinkedHashMap<>(attributes.size() + 1);
-                LDAPEntry en = null;
-                en = lsr.next();
-                entry.put("dn", en.getDN());
-                if (attributes != null && attributes.size() > 0) {
-                    for (int col = 0; col < attributes.size(); col++) {
-                        Object val = readValue(en.getAttributeSet().getAttribute(attributes.get(col)));
-                        if (val != null) entry.put(attributes.get(col),val );
-                    }
-                } else {
-                    // make it dynamic
-                    Iterator<LDAPAttribute> iter = en.getAttributeSet().iterator();
-                    while (iter.hasNext()) {
-                        LDAPAttribute attr = iter.next();
-                        Object val = readValue(attr);
-                        if (val != null) entry.put(attr.getName(), readValue(attr));
+            if (this.log.isDebugEnabled())
+                this.log.debug("Fetching next LDAP entry");
+            if (handleEndOfResults())
+                return null;
+            Map<String, Object> entryMap = new LinkedHashMap<>(attributes.size()+1);
+            Entry ldapEntry = entries.next();
+            if (this.log.isDebugEnabled())
+                log.debug(String.format("Processing entry: %s", ldapEntry.toString()));
 
-                    }
-                    //System.out.println("entry " + entry);
-                    return entry;
-                }
-                //System.out.println("entry " + entry);
-                return entry;
-
-            } catch (LDAPException e) {
-
-                e.printStackTrace();
-                throw new RuntimeException("Error getting next ldap entry " + e.getLDAPErrorMessage());
+            // always return a distinguishedname in the result like an LDAP search would
+            entryMap.put("dn", ldapEntry.getDn().toString());
+            for (Attribute attribute : ldapEntry) {
+                String attrName = attribute.getId();
+                entryMap.put(attrName, readValue(attribute));
             }
+            if (this.log.isDebugEnabled())
+                log.debug(String.format("entryMap: %s", entryMap));
+            return entryMap;
         }
 
-        private boolean handleEndOfResults()  {
-            if (!lsr.hasMore()) {
-                return true;
-            }
-            return false;
+        private boolean handleEndOfResults() {
+            return !entries.hasNext();
         }
-        private Object readValue(LDAPAttribute att) {
-            if (att == null) return null;
-            if (att.size() == 1) {
-                // single value
-                // for now everything is string
-                return att.getStringValue();
+
+        private Object readValue(Attribute att) {
+            if (att == null)
+                return null;
+            if (this.log.isDebugEnabled())
+                this.log.debug(String.format("Processing attribute: %s", att.getId()));
+
+            // Handle uuid attributes separately since they're single valued anyway
+            String attrName = att.getId();
+            if (attrName.equals("objectguid")) {
+                return LdapUtil.getStringFromObjectGuid(att.get().getBytes());
+            }
+            if (attrName.equals("objectsid")) {
+                return LdapUtil.getStringFromObjectSid(att.get().getBytes());
+            }
+
+            // Handle datetimes specifically for formatting into Neo4j expectations for datetime
+            if (attrName.equalsIgnoreCase("createtimestamp") || attrName.equalsIgnoreCase("modifytimestamp")) {
+                return LdapUtil.formatDateTime(att.get().getString());
+            }
+
+            /*
+                It would be nice to use the schema information to return a List for all multivalued
+                attributes, but guaranteeing that the schema is available is very difficult
+                particularly when it comes to AD which doesn't supply schema information when asked
+             */
+            int numValues = att.size();
+            if (this.log.isDebugEnabled())
+                log.debug(String.format("Attribute %s has %d values", attrName, numValues));
+            if (numValues == 1) {
+                return att.get().getString();
             } else {
-                return att.getStringValueArray();
+                List<String> vals = new ArrayList<>();
+                att.forEach(val -> vals.add(val.getNormalized()));
+                return vals;
             }
         }
     }
-
 }

@@ -7,21 +7,131 @@ This section describes procedures that can be used to import data from LDAP.
 --
 
 
-With 'apoc.load.ldap' you can execute queries on any LDAP v3 enabled directory, the results are turned into a streams of entries.
+With 'apoc.load.ldapurl' you can execute queries on any LDAP v3 enabled directory, the results are turned into a streams of entries.
 The entries can then be used to update or create graph structures.
 
-Note this utility requires to have the link:https://mvnrepository.com/artifact/com.novell.ldap/jldap/2009-10-07[jldap] library to be placed the plugin directory.
 
 [separator=¦,opts=header,cols="1,1m,1m,5"]
 |===
 include::../../../build/generated-documentation/apoc.load.csv[lines=1;12]
 |===
 
+
 == Parameters
+Note: you will need the following jars to be made available in the classpath or else placed alongside APOC in the plugin directory.
+  - Apache MINA Core (https://mina.apache.org/mina-core/) org.apache.mina:mi1f1aa890d52edc381e9b1c875d177d5a7baeb4a5na-core:bundle:2.1.3
+  - SLF4J API Module (http://www.slf4j.org) org.slf4j:slf4j-api:jar:1.7.26
+  - Apache ServiceMix :: Bundles :: antlr (http://servicemix.apache.org/bundles-pom/org.apache.servicemix.bundles.antlr/) org.apache.servicemix.bundles:org.apache.servicemix.bundles.antlr:bundle:2.7.7_5
+  - Apache ServiceMix :: Bundles :: dom4j (http://servicemix.apache.org/bundles-pom/org.apache.servicemix.bundles.dom4j/) org.apache.servicemix.bundles:org.apache.servicemix.bundles.dom4j:bundle:2.1.1_1
+  - Apache ServiceMix :: Bundles :: xpp3 (http://servicemix.apache.org/bundles-pom/org.apache.servicemix.bundles.xpp3/) org.apache.servicemix.bundles:org.apache.servicemix.bundles.xpp3:bundle:1.1.4c_7
+  - Apache Commons Codec (https://commons.apache.org/proper/commons-codec/) commons-codec:commons-codec:jar:1.14
+  - Apache Commons Collections (https://commons.apache.org/proper/commons-collections/) org.apache.commons:commons-collections4:jar:4.4
+  - Apache Commons Lang (http://commons.apache.org/proper/commons-lang/) org.apache.commons:commons-lang3:jar:3.9
+  - Apache Commons Pool (https://commons.apache.org/proper/commons-pool/) org.apache.commons:commons-pool2:jar:2.8.0
+  - Apache Directory API ASN.1 API (http://directory.apache.org/api-parent/api-asn1-parent/api-asn1-api/) org.apache.directory.api:api-asn1-api:bundle:2.0.1
+  - Apache Directory API ASN.1 BER (http://directory.apache.org/api-parent/api-asn1-parent/api-asn1-ber/) org.apache.directory.api:api-asn1-ber:bundle:2.0.1
+  - Apache Directory LDAP API DSML Engine (http://directory.apache.org/api-parent/api-dsml-parent/api-dsml-engine/) org.apache.directory.api:api-dsml-engine:bundle:2.0.1
+  - Apache Directory LDAP API DSML Parser (http://directory.apache.org/api-parent/api-dsml-parent/api-dsml-parser/) org.apache.directory.api:api-dsml-parser:bundle:2.0.1
+  - Apache Directory LDAP API I18n (http://directory.apache.org/api-parent/api-i18n/) org.apache.directory.api:api-i18n:bundle:2.0.1
+  - Apache Directory LDAP API Client API (http://directory.apache.org/api-parent/api-ldap-parent/api-ldap-client-parent/api-ldap-client-api/) org.apache.directory.api:api-ldap-client-api:bundle:2.0.1
+  - Apache Directory LDAP API Codec Core (http://directory.apache.org/api-parent/api-ldap-parent/api-ldap-codec-parent/api-ldap-codec-core/) org.apache.directory.api:api-ldap-codec-core:bundle:2.0.1
+  - Apache Directory LDAP API Codec Standalone (http://directory.apache.org/api-parent/api-ldap-parent/api-ldap-codec-parent/api-ldap-codec-standalone/) org.apache.directory.api:api-ldap-codec-standalone:jar:2.0.1
+  - Apache Directory LDAP API Extras ACI (http://directory.apache.org/api-parent/api-ldap-parent/api-ldap-extras-parent/api-ldap-extras-aci/) org.apache.directory.api:api-ldap-extras-aci:bundle:2.0.1
+  - Apache Directory LDAP API Extras Codec (http://directory.apache.org/api-parent/api-ldap-parent/api-ldap-extras-parent/api-ldap-extras-codec/) org.apache.directory.api:api-ldap-extras-codec:bundle:2.0.1
+  - Apache Directory LDAP API Extras Codec API (http://directory.apache.org/api-parent/api-ldap-parent/api-ldap-extras-parent/api-ldap-extras-codec-api/) org.apache.directory.api:api-ldap-extras-codec-api:bundle:2.0.1
+  - Apache Directory LDAP API Extras Stored Procedures (http://directory.apache.org/api-parent/api-ldap-parent/api-ldap-extras-parent/api-ldap-extras-sp/) org.apache.directory.api:api-ldap-extras-sp:bundle:2.0.1
+  - Apache Directory LDAP API Extras Trigger (http://directory.apache.org/api-parent/api-ldap-parent/api-ldap-extras-parent/api-ldap-extras-trigger/) org.apache.directory.api:api-ldap-extras-trigger:bundle:2.0.1
+  - Apache Directory LDAP API Extras Util (http://directory.apache.org/api-parent/api-ldap-parent/api-ldap-extras-parent/api-ldap-extras-util/) org.apache.directory.api:api-ldap-extras-util:bundle:2.0.1
+  - Apache Directory LDAP API Model (http://directory.apache.org/api-parent/api-ldap-parent/api-ldap-model/) org.apache.directory.api:api-ldap-model:bundle:2.0.1
+  - Apache Directory LDAP API Network MINA (http://directory.apache.org/api-parent/api-ldap-parent/api-ldap-net-parent/api-ldap-net-mina/) org.apache.directory.api:api-ldap-net-mina:bundle:2.0.1
+  - Apache Directory LDAP API Schema Converter (http://directory.apache.org/api-parent/api-ldap-parent/api-ldap-schema-parent/api-ldap-schema-converter/) org.apache.directory.api:api-ldap-schema-converter:bundle:2.0.1
+  - Apache Directory LDAP API Schema Data (http://directory.apache.org/api-parent/api-ldap-parent/api-ldap-schema-parent/api-ldap-schema-data/) org.apache.directory.api:api-ldap-schema-data:jar:2.0.1
+  - Apache Directory LDAP API Utilities (http://directory.apache.org/api-parent/api-util/) org.apache.directory.api:api-util:bundle:2.0.1
+
 
 [options="header",cols="a,3m,a"]
 |===
-|Parameter | Property | Description
+|Parameter      | Property  | Description
+|{connectionMap}| URL or key| See link:https://tools.ietf.org/html/rfc2255[RFC 2255] for the specifications
+|               | username  | This is the dn of the ldap server user who has read access on the ldap server
+|               | password  | This is the password used by the user
+|               | pageSize  | The number of results to return from the LDAP server at a time (default 100)
+|               | url       | Optional, if overriding the URL from the on-disk configuration
+|===
+
+Hint: Use an attribute parameter of * to return all attributes, + to return operational attributes, and no attributes will always return the distinguishedName
+
+=== Load LDAP Example
+
+.Retrieve group member information from the ldap server
+[source,cypher]
+----
+call apoc.load.ldapurl({url: "ldap://localhost:389/dc=neo4j,dc=test?uniqueMember,cn,objectClass?sub?(objectClass=groupOfUniqueNames)", username: 'uid=admin,ou=system', password: 'secret'})
+yield entry
+return entry.dn,  entry.uniqueMember
+----
+
+[options="header",cols="3m,a"]
+|===
+| entry.dn                                 | entry.uniqueMember                                                                               |
+| "cn=Machines,ou=Groups,dc=neo4j,dc=test" | ["cn=Agent Smith,ou=Machines,dc=neo4j,dc=test", "cn=The Architect,ou=Machines,dc=neo4j,dc=test"] |
+| "cn=Humans,ou=Groups,dc=neo4j,dc=test"   | ["cn=Neo,ou=Users,dc=neo4j,dc=test", "cn=Morpheus,ou=Users,dc=neo4j,dc=test"]                    |
+|===
+
+.Retrieve group member information from the ldap server and create structure in Neo4j
+[source,cypher]
+----
+call apoc.load.ldapurl({url: "ldap://localhost:389/dc=neo4j,dc=test?uniqueMember,cn,objectClass?sub?(objectClass=groupOfUniqueNames)", username: 'uid=admin,ou=system', password: 'secret'})
+yield entry
+merge (g:Group {dn : entry.dn})
+on create set g.cn = entry.cn
+foreach (member in entry.uniqueMember |
+  merge (p:Person { dn : member })
+  merge (p)-[:IS_MEMBER]->(g)
+)
+----
+
+=== Credentials
+
+To protect credentials, you can configure aliases in `conf/neo4j.conf`:
+
+.neo4j.conf Syntax
+----
+apoc.static.ldap.localhost_auth.url=ldap://localhost:389/dc=neo4j,dc=test?uniqueMember,cn,objectClass?sub?(objectClass=groupOfUniqueNames)
+apoc.static.ldap.localhost_auth.username=uid=admin,ou=system
+apoc.static.ldap.localhost_auth.password=secret
+apoc.static.ldap.localhost_auth.pageSize=250
+----
+
+Then
+
+[source,cypher]
+----
+call apoc.load.ldapurl("ldap://localhost:389/dc=neo4j,dc=test?uniqueMember,cn,objectClass?sub?(objectClass=groupOfUniqueNames)", {user: 'uid=admin,ou=system', password: 'secret'})
+yield entry
+return entry.dn,  entry
+----
+
+becomes
+
+[source,cypher]
+---------------
+with apoc.static.getAll("localhost_auth") as ldapconfig
+call apoc.load.ldapurl(ldapconfig)
+yield entry
+return entry.dn,  entry
+-----------------------
+
+== Parameters (Deprecated)
+With 'apoc.load.ldap' you can execute queries on any LDAP v3 enabled directory, the results are turned into a streams of entries.
+The entries can then be used to update or create graph structures.
+NOTE: These configuration options are considered deprecated and you are encouraged to migrate to the above format
+
+Note this utility requires to have the link:https://mvnrepository.com/artifact/com.novell.ldap/jldap/2009-10-07[jldap] library to be placed the plugin directory.
+
+[options="header",cols="a,3m,a"]
+|===
+|Parameter | Property | Description
 |{connectionMap} | ldapHost | the ldapserver:port if port is omitted the default port 389 will be used
 |  | loginDN | This is the dn of the ldap server user who has read access on the ldap server
 |  | loginPW | This is the password used by the loginDN
@@ -74,15 +184,14 @@ foreach (member in entry.uniqueMember |
 
 === Credentials
 
-To protect credentials, you can configure aliases in `conf/neo4j.conf`:
+To protect credentials, you can configure aliases in `conf/apoc.conf`:
 
-.neo4j.conf Syntax
+.apoc.conf Syntax
 ----
 apoc.loadldap.myldap.config=<host>:<port> <loginDN> <loginPW>
 ----
 
-
-.neo4j.conf:
+.apoc.conf:
 ----
 apoc.loadldap.myldap.config=ldap.forumsys.com:389 cn=read-only-admin,dc=example,dc=com password
 ----

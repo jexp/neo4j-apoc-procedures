@@ -95,7 +95,9 @@ dependencies {
     compile group: 'net.minidev', name: 'json-smart', version: '2.4.2'
     compile group: 'org.hdrhistogram', name: 'HdrHistogram', version: '2.1.9'
     compile group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: '1.7.3'
-    compile group: 'com.novell.ldap', name: 'jldap', version: '2009-10-07'
+    compileOnly group: 'org.apache.directory.api', name: 'api-all', version: '2.0.1'
+    testImplementation group: 'org.apache.directory.api', name: 'api-all', version: '2.0.1'
+    testCompile group: 'org.apache.directory.server', name: 'apacheds-test-framework', version: '2.0.0.AM26', { exclude group: 'org.apache.directory.api', module: 'api-ldap-schema-data' }
 
     def withoutAntlr =  {
         exclude group: 'org.glassfish'
