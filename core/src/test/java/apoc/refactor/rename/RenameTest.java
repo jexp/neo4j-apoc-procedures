@@ -109,6 +109,7 @@ public class RenameTest {
 	}
 
 	@Test
+	@Ignore("in 4.3 it should be hard to reproduce")
 	public void testDeadlockException() {
 		String query = "UNWIND RANGE(1, 100) AS ID \n" +
 				"MERGE (account1:Account{ID: ID})\n" +
