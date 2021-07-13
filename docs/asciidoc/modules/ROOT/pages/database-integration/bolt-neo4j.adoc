@@ -20,7 +20,7 @@ include::example$generated-documentation/apoc.bolt.load.adoc[]
 
 [source,cypher]
 ----
-call apoc.bolt.load("bolt://user:password@localhost:7687","match(p:Person {name:{name}}) return p", {name:'Michael'})
+call apoc.bolt.load("bolt://user:password@localhost:7687","match(p:Person {name: $name}) return p", {name:'Michael'})
 ----
 
 * **apoc.conf** : here the are two choices:
@@ -31,7 +31,7 @@ call apoc.bolt.load("bolt://user:password@localhost:7687","match(p:Person {name:
 
 [source,cypher]
 ----
-call apoc.bolt.load("","match(p:Person {name:{name}}) return p", {name:'Michael'})
+call apoc.bolt.load("","match(p:Person {name: $name}) return p", {name:'Michael'})
 ----
 
 .neo4jConf
@@ -49,7 +49,7 @@ apoc.bolt.url=bolt://user:password@localhost:7687
 
 [source,cypher]
 ----
-call apoc.bolt.load("test","match(p:Person {name:{name}}) return p", {name:'Michael'})
+call apoc.bolt.load("test","match(p:Person {name: $name}) return p", {name:'Michael'})
 ----
 
 .neo4jConf
@@ -103,7 +103,8 @@ You can find all the values in the documentation http://neo4j.com/docs/api/java-
 [source,cypher]
 ----
 call apoc.bolt.execute("bolt://user:password@localhost:7687",
-"match(p:Person {name:{name}}) return p", {name:'Michael'})
+"match(p:Person {name: $name}) set p.surname = $surname return p", 
+{name:'Michael', surname: 'Jordan'})
 ----
 
 image::apoc.bolt.execute.nodemap.PNG[scaledwidth="100%"]
@@ -114,7 +115,7 @@ image::apoc.bolt.execute.nodemap.PNG[scaledwidth="100%"]
 [source,cypher]
 ----
 call apoc.bolt.load("bolt://user:password@localhost:7687",
-"match(p:Person {name:{name}}) return p", {name:'Michael'}, {virtual:true})
+"match(p:Person {name: $name}) return p", {name:'Michael'}, {virtual:true})
 ----
 
 image::apoc.bolt.load.virtualnode.PNG[scaledwidth="100%"]
@@ -125,7 +126,7 @@ image::apoc.bolt.load.virtualnode.PNG[scaledwidth="100%"]
 [source,cypher]
 ----
 call apoc.bolt.execute("bolt://user:password@localhost:7687",
-"create(n:Node {name:{name}})", {name:'Node1'}, {statistics:true})
+"create(n:Node {name: $name})", {name:'Node1'}, {statistics:true})
 ----
 
 image::apoc.bolt.execute.createandstatistics.PNG[scaledwidth="100%"]
@@ -136,7 +137,7 @@ image::apoc.bolt.execute.createandstatistics.PNG[scaledwidth="100%"]
 [source,cypher]
 ----
 call apoc.bolt.execute("bolt://user:password@localhost:7687",
-"match (n:Person {name:{name}}) return n.age as age, n.name as name, n.surname as surname", {name:'Michael'})
+"match (n:Person {name: $name}) set n.foo = 'bar' return n.age as age, n.name as name, n.surname as surname, n.foo as foo", {name:'Michael'})
 ----
 
 image::apoc.bolt.execute.scalarmulti.PNG[scaledwidth="100%"]
@@ -147,7 +148,7 @@ image::apoc.bolt.execute.scalarmulti.PNG[scaledwidth="100%"]
 [source,cypher]
 ----
 call apoc.bolt.load("bolt://user:password@localhost:7687",
-"MATCH (n:Person{name:{name}})-[r:KNOWS]->(p) return r as rel", {name:'Anne'})
+"MATCH (n:Person{name: $name})-[r:KNOWS]->(p) return r as rel", {name:'Anne'})
 ----
 
 image::apoc.bolt.load.relmap.PNG[scaledwidth="100%"]
@@ -158,7 +159,7 @@ image::apoc.bolt.load.relmap.PNG[scaledwidth="100%"]
 [source,cypher]
 ----
 call apoc.bolt.load("bolt://user:password@localhost:7687",
-"START n=node({idNode}) MATCH path= (n)-[r:REL_TYPE*..3]->(o) return path", {idNode:200}, {virtual:true})
+"MATCH (n) WHERE id(n) = $idNode MATCH path= (n)-[r:REL_TYPE*..3]->(o) return path", {idNode:200}, {virtual:true})
 ----
 
 image::apoc.bolt.load.returnvirtualpath.PNG[scaledwidth="100%"]
@@ -169,7 +170,7 @@ image::apoc.bolt.load.returnvirtualpath.PNG[scaledwidth="100%"]
 [source,cypher]
 ----
 call apoc.bolt.execute("bolt://user:password@localhost:7687",
-"CREATE (n:Car{brand:{brand},model:{model},year:{year}}) return n", {brand:'Ferrari',model:'California',year:2016})
+"CREATE (n:Car{brand: $brand, model: $model, year: $year}) return n", {brand:'Ferrari',model:'California',year:2016})
 ----
 
 image::apoc.bolt.execute.createwithparams.PNG[scaledwidth="100%"]

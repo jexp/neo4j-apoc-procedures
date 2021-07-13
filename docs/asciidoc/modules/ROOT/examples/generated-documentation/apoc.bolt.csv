@@ -1,7 +1,7 @@
 ¦Qualified Name¦Type¦Release
 |xref::overview/apoc.bolt/apoc.bolt.adoc[apoc.bolt.execute icon:book[]]
 
-apoc.bolt.execute(url-or-key, kernelTransaction, params, config) - access to other databases via bolt for read
+apoc.bolt.execute(url-or-key, kernelTransaction, params, config) - access to other databases via bolt for reads and writes
 |label:procedure[]
 |label:apoc-core[]
 |xref::overview/apoc.bolt/apoc.bolt.adoc[apoc.bolt.load icon:book[]]

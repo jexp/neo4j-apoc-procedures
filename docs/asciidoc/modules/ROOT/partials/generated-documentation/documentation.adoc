@@ -203,7 +203,7 @@ apoc.bitwise.op(60,'\|',13) bitwise operations a & b, a \| b, a ^ b, ~a, a >> b,
 | Qualified Name | Type | Release
 |xref::overview/apoc.bolt/apoc.bolt.execute.adoc[apoc.bolt.execute icon:book[]]
 
-apoc.bolt.execute(url-or-key, kernelTransaction, params, config) - access to other databases via bolt for read
+apoc.bolt.execute(url-or-key, kernelTransaction, params, config) - access to other databases via bolt for reads and writes
 |label:procedure[]
 |label:apoc-core[]
 |xref::overview/apoc.bolt/apoc.bolt.load.adoc[apoc.bolt.load icon:book[]]
