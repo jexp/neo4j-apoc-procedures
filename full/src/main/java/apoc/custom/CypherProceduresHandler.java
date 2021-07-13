@@ -98,8 +98,8 @@ public class CypherProceduresHandler extends LifecycleAdapter implements Availab
     private final JobScheduler jobScheduler;
     private long lastUpdate;
     private final ThrowingFunction<Context, Transaction, ProcedureException> transactionComponentFunction;
-    private Set<ProcedureSignature> registeredProcedureSignatures = emptySet();
-    private Set<UserFunctionSignature> registeredUserFunctionSignatures = emptySet();
+    private final Set<ProcedureSignature> registeredProcedureSignatures = Collections.synchronizedSet(new HashSet<>());
+    private final Set<UserFunctionSignature> registeredUserFunctionSignatures = Collections.synchronizedSet(new HashSet<>());
     private static Group REFRESH_GROUP = Group.STORAGE_MAINTENANCE;
     private JobHandle restoreProceduresHandle;
 
@@ -206,28 +206,23 @@ public class CypherProceduresHandler extends LifecycleAdapter implements Availab
 
     public void restoreProceduresAndFunctions() {
         lastUpdate = System.currentTimeMillis();
-        Set<ProcedureSignature> currentProcedureSignatures = Collections.synchronizedSet(new HashSet<>());
-        Set<UserFunctionSignature> currentUserFunctionSignatures = Collections.synchronizedSet(new HashSet<>());
+        Set<ProcedureSignature> currentProceduresToRemove = new HashSet<>(registeredProcedureSignatures);
+        Set<UserFunctionSignature> currentUserFunctionsToRemove = new HashSet<>(registeredUserFunctionSignatures);
 
         readSignatures().forEach(descriptor -> {
             descriptor.register();
             if (descriptor instanceof ProcedureDescriptor) {
                 ProcedureSignature signature = ((ProcedureDescriptor) descriptor).getSignature();
-                currentProcedureSignatures.add(signature);
-                registeredProcedureSignatures.remove(signature);
+                currentProceduresToRemove.remove(signature);
             } else {
                 UserFunctionSignature signature = ((UserFunctionDescriptor) descriptor).getSignature();
-                currentUserFunctionSignatures.add(signature);
-                registeredUserFunctionSignatures.remove(signature);
+                currentUserFunctionsToRemove.remove(signature);
             }
         });
 
         // de-register removed procs/functions
-        registeredProcedureSignatures.forEach(signature -> registerProcedure(signature, null));
-        registeredUserFunctionSignatures.forEach(signature -> registerFunction(signature, null, false));
-
-        registeredProcedureSignatures = currentProcedureSignatures;
-        registeredUserFunctionSignatures = currentUserFunctionSignatures;
+        currentProceduresToRemove.forEach(signature -> registerProcedure(signature, null));
+        currentUserFunctionsToRemove.forEach(signature -> registerFunction(signature, null, false));
 
         api.executeTransactionally("call db.clearQueryCaches()");
     }
@@ -340,10 +335,11 @@ public class CypherProceduresHandler extends LifecycleAdapter implements Availab
      */
     public boolean registerProcedure(ProcedureSignature signature, String statement) {
         try {
+            final boolean isStatementNull = statement == null;
             globalProceduresRegistry.register(new CallableProcedure.BasicProcedure(signature) {
                 @Override
                 public RawIterator<AnyValue[], ProcedureException> apply(org.neo4j.kernel.api.procedure.Context ctx, AnyValue[] input, ResourceTracker resourceTracker) throws ProcedureException {
-                    if (statement == null) {
+                    if (isStatementNull) {
                         final String error = String.format("There is no procedure with the name `%s` registered for this database instance. " +
                                 "Please ensure you've spelled the procedure name correctly and that the procedure is properly deployed.", signature.name());
                         throw new QueryExecutionException(error, null, "Neo.ClientError.Statement.SyntaxError");
@@ -362,7 +358,11 @@ public class CypherProceduresHandler extends LifecycleAdapter implements Availab
                     }
                 }
             }, true);
-            registeredProcedureSignatures.add(signature);
+            if (isStatementNull) {
+                registeredProcedureSignatures.remove(signature);
+            } else {
+                registeredProcedureSignatures.add(signature);
+            }
             return true;
         } catch (Exception e) {
             log.error("Could not register procedure: " + signature.name() + " with " + statement + "\n accepting" + signature.inputSignature() + " resulting in " + signature.outputSignature() + " mode " + signature.mode(), e);
@@ -372,10 +372,11 @@ public class CypherProceduresHandler extends LifecycleAdapter implements Availab
 
     public boolean registerFunction(UserFunctionSignature signature, String statement, boolean forceSingle) {
         try {
+            final boolean isStatementNull = statement == null;
             globalProceduresRegistry.register(new CallableUserFunction.BasicUserFunction(signature) {
                 @Override
                 public AnyValue apply(org.neo4j.kernel.api.procedure.Context ctx, AnyValue[] input) throws ProcedureException {
-                    if (statement == null) {
+                    if (isStatementNull) {
                         final String error = String.format("Unknown function '%s'", signature.name());
                         throw new QueryExecutionException(error, null, "Neo.ClientError.Statement.SyntaxError");
                     } else {
@@ -409,7 +410,11 @@ public class CypherProceduresHandler extends LifecycleAdapter implements Availab
 
                 }
             }, true);
-            registeredUserFunctionSignatures.add(signature);
+            if (isStatementNull) {
+                registeredUserFunctionSignatures.remove(signature);
+            } else {
+                registeredUserFunctionSignatures.add(signature);
+            }
             return true;
         } catch (Exception e) {
             log.error("Could not register function: " + signature + "\nwith: " + statement + "\n single result " + forceSingle, e);
