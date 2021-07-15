@@ -439,6 +439,29 @@ public class MetaTest {
     }
 
     @Test
+    public void testIssue1861LabelAndTypeWithSameName() {
+        db.executeTransactionally("CREATE (s0 :person{id:1} ) SET s0.name = 'rose'\n" +
+                "CREATE (t0 :person{id:2}) SET t0.name = 'jack'\n" +
+                "MERGE (s0) -[r0:person {alfa: 'beta'}] -> (t0)");
+        testCall(db,"CALL apoc.meta.schema()", (row) -> {
+            Map<String, Object> value = (Map<String, Object>) row.get("value");
+            assertEquals(2, value.size());
+            
+            Map<String, Object>  personRelationship = (Map<String, Object>) value.get("person (RELATIONSHIP)");
+            assertEquals(1L, personRelationship.get("count"));
+            assertEquals("relationship", personRelationship.get("type"));
+            Map<String, Object>  relationshipProps = (Map<String, Object>) personRelationship.get("properties");
+            assertEquals(Set.of("alfa"), relationshipProps.keySet());
+            
+            Map<String, Object> personNode = (Map<String, Object>) value.get("person");
+            assertEquals(2L, personNode.get("count"));
+            assertEquals("node", personNode.get("type"));
+            Map<String, Object>  nodeProps = (Map<String, Object>) personNode.get("properties");
+            assertEquals(Set.of("name", "id"), nodeProps.keySet());
+        });
+    }
+    
+    @Test
     public void testSubGraphNoLimits() throws Exception {
         db.executeTransactionally("CREATE (:A)-[:X]->(b:B),(b)-[:Y]->(:C)");
         testCall(db,"CALL apoc.meta.subGraph({})", (row) -> {

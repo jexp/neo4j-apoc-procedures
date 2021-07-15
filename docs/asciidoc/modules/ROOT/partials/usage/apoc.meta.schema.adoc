@@ -25,7 +25,9 @@ CREATE (Keanu)-[:ACTED_IN {roles:['Kevin Lomax']}]->(TheDevilsAdvocate)
 CREATE (TomH)-[:ACTED_IN {roles:['Joe Fox']}]->(YouveGotMail)
 CREATE (TomH)-[:ACTED_IN {roles:['Sam Baldwin']}]->(SleeplessInSeattle)
 CREATE (TomH)-[:ACTED_IN {roles:['Mr. White']}]->(ThatThingYouDo)
-CREATE (TomH)-[:ACTED_IN {roles:['Zachry', 'Dr. Henry Goose', 'Isaac Sachs', 'Dermot Hoggins']}]->(CloudAtlas);
+CREATE (TomH)-[:ACTED_IN {roles:['Zachry', 'Dr. Henry Goose', 'Isaac Sachs', 'Dermot Hoggins']}]->(CloudAtlas)
+
+CREATE (s0:sameName{id:1}) -[r0:sameName {alfa: 'beta'}] -> (t0:sameName{id:2});
 ----
 
 [source,cypher]
@@ -36,12 +38,17 @@ UNWIND keys(value) AS key
 RETURN key, value[key] AS value;
 ----
 
+Note that, in case of relationship type and node label with the same name, 
+the relationships will be distinguished by the suffix " (RELATIONSHIP)"
+
 .Results
 [opts="header"]
 |===
-| key        | value
-| "Movie"    | {count: 9, relationships: {ACTED_IN: {count: 41, properties: {roles: {existence: FALSE, type: "LIST", array: TRUE}}, direction: "in", labels: ["Person"]}}, type: "node", properties: {tagline: {existence: FALSE, type: "STRING", indexed: FALSE, unique: FALSE}, title: {existence: FALSE, type: "STRING", indexed: FALSE, unique: FALSE}, released: {existence: FALSE, type: "INTEGER", indexed: FALSE, unique: FALSE}}, labels: []}
-| "ACTED_IN" | {count: 9, type: "relationship", properties: {roles: {existence: FALSE, type: "LIST", array: TRUE}}}
-| "Person"   | {count: 2, relationships: {ACTED_IN: {count: 9, properties: {roles: {existence: FALSE, type: "LIST", array: TRUE}}, direction: "out", labels: ["Movie"]}}, type: "node", properties: {name: {existence: FALSE, type: "STRING", indexed: FALSE, unique: FALSE}, born: {existence: FALSE, type: "INTEGER", indexed: FALSE, unique: FALSE}}, labels: []}
+| key                       | value
+| "Movie"                   | {count: 9, relationships: {ACTED_IN: {count: 41, properties: {roles: {existence: FALSE, type: "LIST", array: TRUE}}, direction: "in", labels: ["Person"]}}, type: "node", properties: {tagline: {existence: FALSE, type: "STRING", indexed: FALSE, unique: FALSE}, title: {existence: FALSE, type: "STRING", indexed: FALSE, unique: FALSE}, released: {existence: FALSE, type: "INTEGER", indexed: FALSE, unique: FALSE}}, labels: []}
+| "ACTED_IN"                | {count: 9, type: "relationship", properties: {roles: {existence: FALSE, type: "LIST", array: TRUE}}}
+| "Person"                  | {count: 2, relationships: {ACTED_IN: {count: 9, properties: {roles: {existence: FALSE, type: "LIST", array: TRUE}}, direction: "out", labels: ["Movie"]}}, type: "node", properties: {name: {existence: FALSE, type: "STRING", indexed: FALSE, unique: FALSE}, born: {existence: FALSE, type: "INTEGER", indexed: FALSE, unique: FALSE}}, labels: []}
+| "sameName (RELATIONSHIP)" | {"count":1,"type":"relationship","properties":{"alfa":{"existence":false,"type":"STRING","array":false}}}
+| "sameName"                | {count: 2, relationships: {"sameName": {count: 1, properties: {alfa: {existence: false, type: "STRING", array: false}}, direction: "out", labels: ["sameName"]}}, type:"node", properties: {id: {existence: false,type: "INTEGER", indexed: false,unique: false}},labels: []}
 |===
 
