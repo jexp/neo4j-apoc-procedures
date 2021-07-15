@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.scard.adoc[apoc.redis.scard icon:book[]] +
+
+`apoc.redis.scard(uri, key, \{config}) | Execute the 'SCARD key' command`
+¦label:procedure[]
+¦label:apoc-core[]

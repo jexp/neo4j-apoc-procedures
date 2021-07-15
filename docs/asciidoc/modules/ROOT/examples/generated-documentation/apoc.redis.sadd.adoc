@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.sadd.adoc[apoc.redis.sadd icon:book[]] +
+
+`apoc.redis.sadd(uri, key, members, \{config}) | Execute the 'SADD key members' command`
+¦label:procedure[]
+¦label:apoc-core[]

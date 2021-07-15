@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.spop.adoc[apoc.redis.spop icon:book[]] +
+
+`apoc.redis.spop(uri, key, \{config}) | Execute the 'SPOP key' command`
+¦label:procedure[]
+¦label:apoc-core[]

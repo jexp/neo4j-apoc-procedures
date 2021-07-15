@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.zrem.adoc[apoc.redis.zrem icon:book[]] +
+
+`apoc.redis.zrem(uri, key, members, \{config}) | Execute the 'ZREM key members' command`
+¦label:procedure[]
+¦label:apoc-core[]

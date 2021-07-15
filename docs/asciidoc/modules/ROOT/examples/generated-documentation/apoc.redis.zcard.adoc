@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.zcard.adoc[apoc.redis.zcard icon:book[]] +
+
+`apoc.redis.zcard(uri, key, \{config}) | Execute the 'ZCARD key' command`
+¦label:procedure[]
+¦label:apoc-core[]

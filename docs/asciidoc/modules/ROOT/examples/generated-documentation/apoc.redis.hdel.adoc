@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.hdel.adoc[apoc.redis.hdel icon:book[]] +
+
+`apoc.redis.hdel(uri, key, fields, \{config}) | Execute the 'HDEL key fields' command`
+¦label:procedure[]
+¦label:apoc-core[]

@@ -161,6 +161,7 @@ public class DocsTest {
         docs.put("apoc.es.*", "database-integration/elasticsearch.adoc");
         docs.put("apoc.refactor.rename.*", "graph-updates/graph-refactoring/rename-label-type-property.adoc");
         docs.put("apoc.couchbase.*", "database-integration/couchbase.adoc");
+        docs.put("apoc.redis.*", "database-integration/redis.adoc");
         docs.put("apoc.create.node.*|apoc.create.setP.*|apoc.create.setRel.*|apoc.create.relationship|apoc.nodes.link|apoc.merge.*|apoc.create.remove.*", "graph-updates/data-creation.adoc");
         docs.put("apoc.custom.*", "cypher-execution/cypher-based-procedures-functions.adoc");
         docs.put("apoc.generate.*", "graph-updates/graph-generators.adoc");

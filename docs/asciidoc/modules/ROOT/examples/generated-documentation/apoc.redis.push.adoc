@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.push.adoc[apoc.redis.push icon:book[]] +
+
+`apoc.redis.push(uri, key, values, \{config}) | Execute the 'LPUSH key field values' command, or the 'LPUSH' if config right=true (default)`
+¦label:procedure[]
+¦label:apoc-core[]

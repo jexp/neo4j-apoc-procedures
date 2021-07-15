@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.exists.adoc[apoc.redis.exists icon:book[]] +
+
+`apoc.redis.exists(uri, keys, \{config}) | Execute the 'EXISTS keys' command`
+¦label:procedure[]
+¦label:apoc-core[]

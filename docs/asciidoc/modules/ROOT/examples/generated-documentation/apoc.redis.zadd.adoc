@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.zadd.adoc[apoc.redis.zadd icon:book[]] +
+
+`apoc.redis.zadd(uri, keys, scoresAndMembers, \{config}) | Execute the 'ZADD key scoresAndMembers' command, where scoresAndMembers is a list of score,member,score,member,...`
+¦label:procedure[]
+¦label:apoc-core[]

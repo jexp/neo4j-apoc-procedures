@@ -1,0 +1,17 @@
+
+pluginManagement {
+    repositories {
+//        mavenLocal()
+        maven {
+            url "https://neo.jfrog.io/neo/docs-maven" // System.env.ARTIFACTORY_URI
+/*
+        credentials {
+            username System.env.ARTIFACTORY_USERNAME
+            password System.env.ARTIFACTORY_PASSWORD
+        }
+*/
+        }
+        gradlePluginPortal()
+
+    }
+}

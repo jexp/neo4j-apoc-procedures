@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.hexists.adoc[apoc.redis.hexists icon:book[]] +
+
+`apoc.redis.hexists(uri, key, field, \{config}) | Execute the 'HEXISTS key field' command`
+¦label:procedure[]
+¦label:apoc-core[]

@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.pttl.adoc[apoc.redis.pttl icon:book[]] +
+
+`apoc.redis.pttl(uri, key, \{config}) | Execute the 'PTTL key' command`
+¦label:procedure[]
+¦label:apoc-core[]

@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.incrby.adoc[apoc.redis.incrby icon:book[]] +
+
+`apoc.redis.incrby(uri, key, amount, \{config}) | Execute the 'INCRBY key increment' command`
+¦label:procedure[]
+¦label:apoc-core[]

@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.hgetall.adoc[apoc.redis.hgetall icon:book[]] +
+
+`apoc.redis.hgetall(uri, key, \{config}) | Execute the 'HGETALL key' command`
+¦label:procedure[]
+¦label:apoc-core[]

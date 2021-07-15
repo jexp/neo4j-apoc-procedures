@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.zrangebyscore.adoc[apoc.redis.zrangebyscore icon:book[]] +
+
+`apoc.redis.zrangebyscore(uri, key, min, max, \{config}) | Execute the 'ZRANGEBYSCORE key min max' command`
+¦label:procedure[]
+¦label:apoc-core[]

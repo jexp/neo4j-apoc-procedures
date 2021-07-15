@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.setGet.adoc[apoc.redis.setGet icon:book[]] +
+
+`apoc.redis.setGet(uri, key, value, \{config}) | Execute the 'SET key value' command and return old value stored (or null if did not exists)`
+¦label:procedure[]
+¦label:apoc-core[]

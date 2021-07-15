@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.hincrby.adoc[apoc.redis.hincrby icon:book[]] +
+
+`apoc.redis.hincrby(uri, key, field, amount, \{config}) | Execute the 'HINCRBY key field amount' command`
+¦label:procedure[]
+¦label:apoc-core[]

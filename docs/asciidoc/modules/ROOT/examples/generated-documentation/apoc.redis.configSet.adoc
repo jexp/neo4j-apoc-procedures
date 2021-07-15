@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.configSet.adoc[apoc.redis.configSet icon:book[]] +
+
+`apoc.redis.configSet(uri, parameter, \{config}) | Execute the 'CONFIG SET parameter value' command`
+¦label:procedure[]
+¦label:apoc-core[]

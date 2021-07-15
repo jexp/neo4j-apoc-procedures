@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.append.adoc[apoc.redis.append icon:book[]] +
+
+`apoc.redis.append(uri, key, value, \{config}) | Execute the 'APPEND key value' command`
+¦label:procedure[]
+¦label:apoc-core[]

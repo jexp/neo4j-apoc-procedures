@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.lrange.adoc[apoc.redis.lrange icon:book[]] +
+
+`apoc.redis.lrange(uri, key, start, stop, \{config}) | Execute the 'LRANGE key start stop' command`
+¦label:procedure[]
+¦label:apoc-core[]

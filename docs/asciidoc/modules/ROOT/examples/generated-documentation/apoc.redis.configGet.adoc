@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.configGet.adoc[apoc.redis.configGet icon:book[]] +
+
+`apoc.redis.configGet(uri, parameter, \{config}) | Execute the 'CONFIG GET parameter' command`
+¦label:procedure[]
+¦label:apoc-core[]

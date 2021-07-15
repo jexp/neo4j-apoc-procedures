@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.persist.adoc[apoc.redis.persist icon:book[]] +
+
+`apoc.redis.persist(uri, key, \{config}) | Execute the 'PERSIST key' command`
+¦label:procedure[]
+¦label:apoc-core[]

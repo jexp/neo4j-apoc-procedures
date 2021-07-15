@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.eval.adoc[apoc.redis.eval icon:book[]] +
+
+`apoc.redis.eval(uri, script, outputType, keys, values, \{config}) | Execute the 'EVAL script' command`
+¦label:procedure[]
+¦label:apoc-core[]

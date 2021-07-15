@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.get.adoc[apoc.redis.get icon:book[]] +
+
+`apoc.redis.get(uri, key, \{config}) | Execute the 'GET key' command`
+¦label:procedure[]
+¦label:apoc-core[]

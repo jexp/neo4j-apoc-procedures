@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.pexpire.adoc[apoc.redis.pexpire icon:book[]] +
+
+`apoc.redis.pexpire(uri, key, time, isExpireAt \{config}) | Execute the 'PEXPIRE key time' command, or the 'PEPXPIREAT' if isExpireAt=true`
+¦label:procedure[]
+¦label:apoc-core[]

@@ -1,0 +1,570 @@
+[[redis]]
+= MongoDB
+:description: This section describes procedures that can be used to interact with MongoDB.
+
+Here is a list of all available Redis procedures:
+
+[opts=header, cols="1, 4, 4", separator="¦"]
+|===
+¦name¦signature¦description
+¦apoc.redis.append¦apoc.redis.append(uri :: STRING?, key :: STRING?, value :: STRING?, config = {} :: MAP?) :: (value :: INTEGER?)¦apoc.redis.append(uri, key, value, \{config}) | Execute the 'APPEND key value' command
+¦apoc.redis.configGet¦apoc.redis.configGet(uri :: STRING?, parameter :: STRING?, config = {} :: MAP?) :: (value :: MAP?)¦apoc.redis.configGet(uri, parameter, \{config}) | Execute the 'CONFIG GET parameter' command
+¦apoc.redis.configSet¦apoc.redis.configSet(uri :: STRING?, parameter :: STRING?, value :: STRING?, config = {} :: MAP?) :: (value :: STRING?)¦apoc.redis.configSet(uri, parameter, \{config}) | Execute the 'CONFIG SET parameter value' command
+¦apoc.redis.copy¦apoc.redis.copy(uri :: STRING?, source :: STRING?, destination :: STRING?, config = {} :: MAP?) :: (value :: BOOLEAN?)¦apoc.redis.copy(uri, source, destination, \{config}) | Execute the 'COPY source destination' command
+¦apoc.redis.eval¦apoc.redis.eval(uri :: STRING?, script :: STRING?, outputType :: STRING?, keys :: LIST? OF STRING?, values :: LIST? OF STRING?, config = {} :: MAP?) :: (value :: ANY?)¦apoc.redis.eval(uri, script, outputType, keys, values, \{config}) | Execute the 'EVAL script' command
+¦apoc.redis.exists¦apoc.redis.exists(uri :: STRING?, keys :: LIST? OF STRING?, config = {} :: MAP?) :: (value :: INTEGER?)¦apoc.redis.exists(uri, keys, \{config}) | Execute the 'EXISTS keys' command
+¦apoc.redis.get¦apoc.redis.get(uri :: STRING?, key :: STRING?, config = {} :: MAP?) :: (value :: STRING?)¦apoc.redis.get(uri, key, \{config}) | Execute the 'GET key' command
+¦apoc.redis.hdel¦apoc.redis.hdel(uri :: STRING?, key :: STRING?, fields :: LIST? OF STRING?, config = {} :: MAP?) :: (value :: INTEGER?)¦apoc.redis.hdel(uri, key, fields, \{config}) | Execute the 'HDEL key fields' command
+¦apoc.redis.hexists¦apoc.redis.hexists(uri :: STRING?, key :: STRING?, field :: STRING?, config = {} :: MAP?) :: (value :: BOOLEAN?)¦apoc.redis.hexists(uri, key, field, \{config}) | Execute the 'HEXISTS key field' command
+¦apoc.redis.hget¦apoc.redis.hget(uri :: STRING?, key :: STRING?, field :: STRING?, config = {} :: MAP?) :: (value :: STRING?)¦apoc.redis.hget(uri, key, field, \{config}) | Execute the 'HGET key field' command
+¦apoc.redis.hgetall¦apoc.redis.hgetall(uri :: STRING?, key :: STRING?, config = {} :: MAP?) :: (value :: MAP?)¦apoc.redis.hgetall(uri, key, \{config}) | Execute the 'HGETALL key' command
+¦apoc.redis.hincrby¦apoc.redis.hincrby(uri :: STRING?, key :: STRING?, field :: STRING?, amount :: INTEGER?, config = {} :: MAP?) :: (value :: INTEGER?)¦apoc.redis.hincrby(uri, key, field, amount, \{config}) | Execute the 'HINCRBY key field amount' command
+¦apoc.redis.hset¦apoc.redis.hset(uri :: STRING?, key :: STRING?, field :: MAP?, config = {} :: MAP?) :: (value :: INTEGER?)¦apoc.redis.hset(uri, key, value, \{config}) | Execute the 'HSET key mapFields' command, where mapFields is a map of field1, value1, field2, value2,...
+¦apoc.redis.incrby¦apoc.redis.incrby(uri :: STRING?, key :: STRING?, amount :: INTEGER?, config = {} :: MAP?) :: (value :: INTEGER?)¦apoc.redis.incrby(uri, key, amount, \{config}) | Execute the 'INCRBY key increment' command
+¦apoc.redis.info¦apoc.redis.info(uri :: STRING?, config = {} :: MAP?) :: (value :: STRING?)¦apoc.redis.info(uri, \{config}) | Execute the 'INFO' command
+¦apoc.redis.lrange¦apoc.redis.lrange(uri :: STRING?, key :: STRING?, start :: INTEGER?, stop :: INTEGER?, config = {} :: MAP?) :: (value :: LIST? OF ANY?)¦apoc.redis.lrange(uri, key, start, stop, \{config}) | Execute the 'LRANGE key start stop' command
+¦apoc.redis.persist¦apoc.redis.persist(uri :: STRING?, key :: STRING?, config = {} :: MAP?) :: (value :: BOOLEAN?)¦apoc.redis.persist(uri, key, \{config}) | Execute the 'PERSIST key' command
+¦apoc.redis.pexpire¦apoc.redis.pexpire(uri :: STRING?, key :: STRING?, time :: INTEGER?, config = {} :: MAP?) :: (value :: BOOLEAN?)¦apoc.redis.pexpire(uri, key, time, isExpireAt \{config}) | Execute the 'PEXPIRE key time' command, or the 'PEPXPIREAT' if isExpireAt=true
+¦apoc.redis.pop¦apoc.redis.pop(uri :: STRING?, key :: STRING?, config = {} :: MAP?) :: (value :: STRING?)¦apoc.redis.pop(uri, key, \{config}) | Execute the 'LPOP key' command, or the 'RPOP' if config right=true (default)
+¦apoc.redis.pttl¦apoc.redis.pttl(uri :: STRING?, key :: STRING?, config = {} :: MAP?) :: (value :: INTEGER?)¦apoc.redis.pttl(uri, key, \{config}) | Execute the 'PTTL key' command
+¦apoc.redis.push¦apoc.redis.push(uri :: STRING?, key :: STRING?, value :: LIST? OF STRING?, config = {} :: MAP?) :: (value :: INTEGER?)¦apoc.redis.push(uri, key, values, \{config}) | Execute the 'LPUSH key field values' command, or the 'LPUSH' if config right=true (default)
+¦apoc.redis.sadd¦apoc.redis.sadd(uri :: STRING?, key :: STRING?, members :: LIST? OF STRING?, config = {} :: MAP?) :: (value :: INTEGER?)¦apoc.redis.sadd(uri, key, members, \{config}) | Execute the 'SADD key members' command
+¦apoc.redis.scard¦apoc.redis.scard(uri :: STRING?, key :: STRING?, config = {} :: MAP?) :: (value :: INTEGER?)¦apoc.redis.scard(uri, key, \{config}) | Execute the 'SCARD key' command
+¦apoc.redis.setGet¦apoc.redis.setGet(uri :: STRING?, key :: STRING?, value :: STRING?, config = {} :: MAP?) :: (value :: STRING?)¦apoc.redis.setGet(uri, key, value, \{config}) | Execute the 'SET key value' command and return old value stored (or null if did not exists)
+¦apoc.redis.smembers¦apoc.redis.smembers(uri :: STRING?, key :: STRING?, config = {} :: MAP?) :: (value :: LIST? OF ANY?)¦apoc.redis.smembers(uri, key, \{config}) | Execute the 'SMEMBERS key' command
+¦apoc.redis.spop¦apoc.redis.spop(uri :: STRING?, key :: STRING?, config = {} :: MAP?) :: (value :: STRING?)¦apoc.redis.spop(uri, key, \{config}) | Execute the 'SPOP key' command
+¦apoc.redis.sunion¦apoc.redis.sunion(uri :: STRING?, keys :: LIST? OF STRING?, config = {} :: MAP?) :: (value :: LIST? OF ANY?)¦apoc.redis.sunion(uri, keys, \{config}) | Execute the 'SUNION keys' command
+¦apoc.redis.zadd¦apoc.redis.zadd(uri :: STRING?, key :: STRING?, value :: LIST? OF ANY?, config = {} :: MAP?) :: (value :: INTEGER?)¦apoc.redis.zadd(uri, keys, scoresAndMembers, \{config}) | Execute the 'ZADD key scoresAndMembers' command, where scoresAndMembers is a list of score,member,score,member,...
+¦apoc.redis.zcard¦apoc.redis.zcard(uri :: STRING?, key :: STRING?, config = {} :: MAP?) :: (value :: INTEGER?)¦apoc.redis.zcard(uri, key, \{config}) | Execute the 'ZCARD key' command
+¦apoc.redis.zrangebyscore¦apoc.redis.zrangebyscore(uri :: STRING?, key :: STRING?, min :: INTEGER?, max :: INTEGER?, config = {} :: MAP?) :: (value :: LIST? OF ANY?)¦apoc.redis.zrangebyscore(uri, key, min, max, \{config}) | Execute the 'ZRANGEBYSCORE key min max' command
+¦apoc.redis.zrem¦apoc.redis.zrem(uri :: STRING?, key :: STRING?, members :: LIST? OF STRING?, config = {} :: MAP?) :: (value :: INTEGER?)¦apoc.redis.zrem(uri, key, members, \{config}) | Execute the 'ZREM key members' command
+|===
+
+[[redis-dependencies]]
+== Install Dependencies
+
+The Redis procedures have dependencies on a client library that is not included in the APOC Library.
+You can download it from https://github.com/lettuce-io/lettuce-core/releases/tag/6.1.1.RELEASE[the lettuce-core repository] 
+or https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/{apoc-release}/apoc-redis-dependencies-{apoc-release}.jar[apoc repository]
+Once that file is downloaded, it should be placed in the `plugins` directory and the Neo4j Server restarted.
+
+[[redis-uri]]
+== URI description
+
+The first parameter of Redis procedure is always the URI.
+This URI follows https://lettuce.io/core/release/reference/#redisuri.uri-syntax[this sintax].
+One example of valid uri is `redis://myPassword@localhost:6379`
+ 
+ 
+[[redis--config]]
+== Configuration parameters
+The procedures support the following config parameters:
+
+.Config parameters
+[opts=header, cols="1,1,1,4"]
+|===
+| name | type | default | description
+| charset | String | "UTF-8" | The charset to encode keys and values
+| timeout | Long | 60 | The connection timeout (in seconds)
+| scriptCharset | String | "UTF-8" | The Lua script charset to encode scripts
+| autoReconnect | `Boolean` | true | Enables or disables auto reconnection on connection loss
+| right | `Boolean` | true | To choose the direction case of procedure with "two sides", 
+    for example in `apoc.redis.push` to choose between RPUSH and LPUSH (right/left push) 
+| expireAt | `Boolean` | true | Converts MongoDB data types into Neo4j data types
+| codec | Enum[STRING, BYTE_ARRAY] | String | The https://lettuce.io/core/release/reference/#codecs[Redis Codec] used for encode key and values (see the `Strings commands` example)
+|===
+
+[[redis-examples]]
+== Examples
+
+Let's see some examples divided by command category.
+
+=== `Strings commands`
+
+`SET` command (return the old value stored):
+
+[source,cypher]
+----
+CALL apoc.redis.setGet($uri, 'myKey', 'myValue')
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| null
+|===
+
+Or with codec: `BYTE_ARRAY`:
+
+[source,cypher]
+----
+CALL apoc.redis.setGet($uri, `BYTES_KEY`, `BYTES_VALUE`, {codec: "BYTE_ARRAY"})
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| {"0":31.0,"1":-117.0,"2":8.0,"3":0.0,"4":0.0,"5":0.0,"6":0.0,"7":0.0,"8":0.0,"9":-1.0,"10":75.0,"11":4.0,"12":0.0,"13":67.0,"14":-66.0,"15":-73.0,"16":-24.0,"17":1.0,"18":0.0,"19":0.0,"20":0.0}
+|===
+
+
+`GET` command:
+
+[source,cypher]
+----
+CALL apoc.redis.get($uri, 'myKey')
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| myValue
+|===
+
+`APPEND` command:
+
+[source,cypher]
+----
+CALL apoc.redis.append($uri, 'myKey', '2')
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| myValue2
+|===
+
+`INCRBY` command, with a initial value '1'':
+
+[source,cypher]
+----
+CALL apoc.redis.incrby($uri, 'myKey', 2)
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| 3
+|===
+
+
+=== `List commands`
+
+`RPUSH` command:
+
+[source,cypher]
+----
+CALL apoc.mongodb.push($uri, 'myListKey', ['foo','bar','baz'])
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| 3
+|===
+
+`LPUSH` command:
+
+[source,cypher]
+----
+CALL apoc.redis.push($uri, 'myListKey', ['prefix1'], {right: false})
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| 4
+|===
+
+`LRANGE` command:
+
+[source,cypher]
+----
+CALL apoc.redis.lrange($uri, 'myListKey', 0 , 10)
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| ["prefix1", "foo", "bar", "baz"]
+|===
+
+`RPOP` command, with the previous value:
+
+[source,cypher]
+----
+CALL apoc.redis.pop($uri, 'myListKey')
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| "baz"
+|===
+
+
+`LPOP` command, with the previous value:
+
+[source,cypher]
+----
+CALL apoc.redis.pop($uri, 'myListKey', {right: false})
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| "prefix1"
+|===
+
+
+
+
+
+=== `Sets commands`
+
+`SADD` command:
+
+[source,cypher]
+----
+CALL apoc.redis.sadd($uri, 'mySetKey', ['foo','bar','baz'])
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| 3
+|===
+
+`SUNION` command, with the previous one and a second key with ['alpha', 'beta'] values:
+
+[source,cypher]
+----
+CALL apoc.redis.sunion($uri, ['mySetKey', 'mySetKeyTwo'])
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| ["foo", "bar", "baz", "alpha", "beta"]
+|===
+
+`SCARD` command, with the previous key:
+
+[source,cypher]
+----
+CALL apoc.redis.scard($uri, 'mySetKey')
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| 3
+|===
+
+`SMEMBERS` command, with the previous key:
+
+[source,cypher]
+----
+CALL apoc.redis.smembers($uri, 'mySetKey')
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| ["foo", "bar", "baz"]
+|===
+
+`SPOP` command, with the previous key:
+
+[source,cypher]
+----
+CALL apoc.redis.smembers($uri, 'mySetKey')
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| "baz"
+|===
+
+
+=== `Sorted sets commands`
+
+`ZADD` command:
+
+[source,cypher]
+----
+CALL apoc.redis.zadd($uri, 'mySortedSetKey', [0, 'first', 100, 'third', 1, 'second'])
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| 3
+|===
+
+`ZCARD` command, with the previous key:
+
+[source,cypher]
+----
+CALL apoc.redis.zcard($uri, 'mySortedSetKey')
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| 3
+|===
+
+`ZRANGEBYSCORE` command, with the previous key:
+
+[source,cypher]
+----
+CALL apoc.redis.zrangebyscore($uri, 'mySortedSetKey', 0, 100)
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| ["first", "second", "third"]
+|===
+
+`ZREM` command, with the previous key:
+
+[source,cypher]
+----
+CALL apoc.redis.zrem($uri, 'mySortedSetKey', ['first', 'second'])
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| 2
+|===
+
+=== `Hashes commands`
+
+`HSET` command:
+
+[source,cypher]
+----
+CALL apoc.redis.hset($uri, 'mapKey', {alpha: 'beta', gamma: 'delta', epsilon: 'zeta', number: '1'})
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| 4
+|===
+
+`HDEL` command, with the previous key:
+
+[source,cypher]
+----
+CALL apoc.redis.hdel($uri, 'mapKey', ['alpha', 'gamma'])
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| 2
+|===
+
+`HEXISTS` command, with the previous key:
+
+[source,cypher]
+----
+CALL apoc.redis.hexists($uri, 'mapKey', 'epsilon')
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| true
+|===
+
+`HGET` command, with the previous key:
+
+[source,cypher]
+----
+CALL apoc.redis.hget($uri, 'mapKey', 'epsilon')
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| "zeta"
+|===
+
+`HINCRBY` command, with the previous key:
+
+[source,cypher]
+----
+CALL apoc.redis.hincrby($uri, 'mapKey', 'number', 3)
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| 4
+|===
+
+=== `Keys commands`
+
+`COPY` command:
+
+[source,cypher]
+----
+CALL apoc.redis.copy($uri, 'from', 'to')
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| true
+|===
+
+`EXISTS` command:
+
+[source,cypher]
+----
+CALL apoc.redis.exists($uri, ['to'])
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| true
+|===
+
+`PEXPIRE` command:
+
+[source,cypher]
+----
+CALL apoc.redis.pexpire($uri, 'to', 100, false)
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| true
+|===
+
+`PTTL` command:
+
+[source,cypher]
+----
+CALL apoc.redis.pexpire($uri, 'to')
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| 95
+|===
+
+`PERSIST` command:
+
+[source,cypher]
+----
+CALL apoc.redis.persist($uri, 'to')
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| true
+|===
+
+
+
+=== `Eval command`
+
+We can execute an eval command with a return value `BOOLEAN`, `INTEGER`, `STATUS`, `VALUE` or `MULTI` (of these types).
+With a `keyEval` with a value `valueEval`,
+we can execute an `EVAL return redis.call("get", KEYS[1]) testEval 'key:name'` command, with a return value 'VALUE':
+
+[source,cypher]
+----
+CALL apoc.redis.eval($uri, 'return redis.call("get", KEYS[1])', 'VALUE', ['testEval'], ['key:name'])
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| valueEval
+|===
+
+=== `Server command`
+
+`INFO` command:
+
+[source,cypher]
+----
+CALL apoc.redis.info($uri)
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| ...INFO SERVER...
+|===
+
+`CONFIG GET` command:
+
+[source,cypher]
+----
+CALL apoc.redis.configGet($uri, "slowlog-max-len")
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| 128
+|===
+
+`CONFIG SET` command:
+
+[source,cypher]
+----
+CALL apoc.redis.configSet($uri, $keyConfig, '64')
+----
+
+.Results
+[opts="header"]
+|===
+| value
+| "OK"
+|===

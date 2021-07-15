@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.sunion.adoc[apoc.redis.sunion icon:book[]] +
+
+`apoc.redis.sunion(uri, keys, \{config}) | Execute the 'SUNION keys' command`
+¦label:procedure[]
+¦label:apoc-core[]

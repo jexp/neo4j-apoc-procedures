@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.hget.adoc[apoc.redis.hget icon:book[]] +
+
+`apoc.redis.hget(uri, key, field, \{config}) | Execute the 'HGET key field' command`
+¦label:procedure[]
+¦label:apoc-core[]

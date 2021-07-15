@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.smembers.adoc[apoc.redis.smembers icon:book[]] +
+
+`apoc.redis.smembers(uri, key, \{config}) | Execute the 'SMEMBERS key' command`
+¦label:procedure[]
+¦label:apoc-core[]

@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.copy.adoc[apoc.redis.copy icon:book[]] +
+
+`apoc.redis.copy(uri, source, destination, \{config}) | Execute the 'COPY source destination' command`
+¦label:procedure[]
+¦label:apoc-core[]

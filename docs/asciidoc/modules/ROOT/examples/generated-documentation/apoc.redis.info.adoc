@@ -1,0 +1,5 @@
+¦xref::overview/apoc.redis/apoc.redis.info.adoc[apoc.redis.info icon:book[]] +
+
+`apoc.redis.info(uri, \{config}) | Execute the 'INFO' command`
+¦label:procedure[]
+¦label:apoc-core[]
