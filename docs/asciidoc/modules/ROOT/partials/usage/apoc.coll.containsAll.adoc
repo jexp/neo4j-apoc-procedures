@@ -2,7 +2,7 @@ The following checks if a collection contains all the values from another collec
 
 [source,cypher]
 ----
-RETURN apoc.coll.contains([1,2,3,4,5], [3,7]) AS output;
+RETURN apoc.coll.containsAll([1,2,3,4,5], [3,7]) AS output;
 ----
 
 .Results
@@ -14,7 +14,7 @@ RETURN apoc.coll.contains([1,2,3,4,5], [3,7]) AS output;
 
 [source,cypher]
 ----
-RETURN apoc.coll.contains([1,2,3,4,5], [1,3]) AS output;
+RETURN apoc.coll.containsAll([1,2,3,4,5], [1,3]) AS output;
 ----
 
 .Results
@@ -26,12 +26,12 @@ RETURN apoc.coll.contains([1,2,3,4,5], [1,3]) AS output;
 
 [source,cypher]
 ----
-RETURN apoc.coll.contains([1,2,3,4,5], [4,1]) AS output;
+RETURN apoc.coll.containsAll([1,2,3,4,5], [4,1]) AS output;
 ----
 
 .Results
 [opts="header",cols="1"]
 |===
 | Output
-| FALSE
+| TRUE
 |===
