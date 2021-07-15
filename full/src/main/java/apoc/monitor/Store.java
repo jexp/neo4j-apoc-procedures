@@ -2,16 +2,17 @@ package apoc.monitor;
 
 import apoc.result.StoreInfoResult;
 import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.util.stream.Stream;
+
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.io.layout.recordstorage.RecordDatabaseLayout;
 import org.neo4j.kernel.database.Database;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Procedure;
-
-import java.io.File;
-import java.util.stream.Stream;
 
 public class Store {
 
@@ -23,7 +24,8 @@ public class Store {
     public Stream<StoreInfoResult> store() {
 
         Database database = ((GraphDatabaseAPI) db).getDependencyResolver().resolveDependency(Database.class);
-        DatabaseLayout databaseLayout = database.getDatabaseLayout();
+        //This will work only on Record format databases. Has to be updated when any additional format is available
+        RecordDatabaseLayout databaseLayout = RecordDatabaseLayout.cast( database.getDatabaseLayout() );
         return Stream.of(new StoreInfoResult(
                 getDirectorySize(databaseLayout.getTransactionLogsDirectory().toFile()),
                 databaseLayout.propertyStringStore().toFile().length(),
