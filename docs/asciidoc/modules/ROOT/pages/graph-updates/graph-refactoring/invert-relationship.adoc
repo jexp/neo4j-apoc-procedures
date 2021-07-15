@@ -21,7 +21,7 @@ The example below will help us learn how to use this procedure.
 
 [source,cypher]
 ----
-CREATE (c:Car {make:"Volvo")-[rel:DRIVES {year:2001}]->(p:Person {name:"Dan"})
+CREATE path=(c:Car {make:"Volvo"})-[rel:DRIVES {year:2001}]->(p:Person {name:"Dan"}) RETURN path
 ----
 
 image::apoc.refactor.invert.dataset.png[scaledwidth="100%"]
@@ -35,6 +35,15 @@ yield input, output
 RETURN input, output
 ----
 
-If we execute this query, it will result in the following graph:
+.Results
+[opts="header",cols="2"]
+|===
+| input |	output
+| 2 | {"identity":3,"start":9,"end":8,"type":"DRIVES","properties":{"year":2001}}
+|===
+
+
+If we execute `MATCH path=(c:Car {make:"Volvo"})-[rel:DRIVES {year:2001}]-(p:Person {name:"Dan"}) RETURN path`, 
+it will result in the following graph:
 
 image::apoc.refactor.invert.png[scaledwidth="100%"]
