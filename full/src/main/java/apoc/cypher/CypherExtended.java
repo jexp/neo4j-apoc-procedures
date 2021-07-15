@@ -324,11 +324,12 @@ public class CypherExtended {
         Util.inFuture(pools, () -> {
             long total = parallelPartitions
                 .map((List<Object> partition) -> {
-                    try {
-                        try (Result result = tx.execute(statement, parallelParams(params, "_", partition))) {
-                            return consumeResult(result, queue, false, timeout);
-                        }
-                    } catch (Exception e) {throw new RuntimeException(e);}}
+                    try (Transaction transaction = db.beginTx();
+                         Result result = transaction.execute(statement, parallelParams(params, "_", partition))) {
+                        return consumeResult(result, queue, false, timeout);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }}
                 ).count();
             queue.put(RowResult.TOMBSTONE);
             return total;

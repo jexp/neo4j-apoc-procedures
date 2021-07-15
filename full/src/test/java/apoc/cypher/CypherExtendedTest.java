@@ -160,6 +160,19 @@ public class CypherExtendedTest {
                     assertEquals(false, r.hasNext());
                 });
     }
+
+    @Test
+    public void shouldNotFailWithTransactionErrorWithMapParallel2() {
+        // Flaky test. Sometimes it's green even without `db.beginTx()` modification
+        db.executeTransactionally("UNWIND range(1, 100) as i create (p:Page {title: i})-[:Link]->(p1:Page1)<-[:Link]-(p2:Page2 {title: 'myTitle'})");
+        testResult(db, "MATCH (p:Page) WITH collect(p) as pages\n" +
+                    "CALL apoc.cypher.mapParallel2(\"MATCH (_)-[:Link]->(p1)<-[:Link]-(p2)\n" +
+                    "RETURN  p2.title as title\", {}, pages, 1) yield value\n" +
+                    "RETURN value.title limit 5", 
+                r -> assertEquals(5, Iterators.count(r)));
+    }
+    
+    
     @Test
     public void testRunFileWithParameters() throws Exception {
         testResult(db, "CALL apoc.cypher.runFile('parameterized.cypher', {statistics:false,parameters:{foo:123,bar:'baz'}})",
