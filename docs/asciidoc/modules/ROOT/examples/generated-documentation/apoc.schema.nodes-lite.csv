@@ -1,2 +1,2 @@
 ¦signature
-¦apoc.schema.nodes(config = {} :: MAP?) :: (name :: STRING?, label :: STRING?, properties :: LIST? OF STRING?, status :: STRING?, type :: STRING?, failure :: STRING?, populationProgress :: FLOAT?, size :: INTEGER?, valuesSelectivity :: FLOAT?, userDescription :: STRING?)
+¦apoc.schema.nodes(config = {} :: MAP?) :: (name :: STRING?, label :: ANY?, properties :: LIST? OF STRING?, status :: STRING?, type :: STRING?, failure :: STRING?, populationProgress :: FLOAT?, size :: INTEGER?, valuesSelectivity :: FLOAT?, userDescription :: STRING?)

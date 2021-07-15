@@ -14,7 +14,7 @@ apoc.schema.assert({indexLabel:[[indexKeys]], ...}, {constraintLabel:[constraint
 
 [source]
 ----
-apoc.schema.assert(indexes :: MAP?, constraints :: MAP?, dropExisting = true :: BOOLEAN?) :: (label :: STRING?, key :: STRING?, keys :: LIST? OF STRING?, unique :: BOOLEAN?, action :: STRING?)
+apoc.schema.assert(indexes :: MAP?, constraints :: MAP?, dropExisting = true :: BOOLEAN?) :: (label :: ANY?, key :: STRING?, keys :: LIST? OF STRING?, unique :: BOOLEAN?, action :: STRING?)
 ----
 
 == Input parameters
@@ -30,7 +30,7 @@ apoc.schema.assert(indexes :: MAP?, constraints :: MAP?, dropExisting = true :: 
 [.procedures, opts=header]
 |===
 | Name | Type 
-|label|STRING?
+|label|ANY?
 |key|STRING?
 |keys|LIST? OF STRING?
 |unique|BOOLEAN?

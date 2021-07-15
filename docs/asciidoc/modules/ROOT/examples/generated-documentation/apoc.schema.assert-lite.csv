@@ -1,2 +1,2 @@
 ¦signature
-¦apoc.schema.assert(indexes :: MAP?, constraints :: MAP?, dropExisting = true :: BOOLEAN?) :: (label :: STRING?, key :: STRING?, keys :: LIST? OF STRING?, unique :: BOOLEAN?, action :: STRING?)
+¦apoc.schema.assert(indexes :: MAP?, constraints :: MAP?, dropExisting = true :: BOOLEAN?) :: (label :: ANY?, key :: STRING?, keys :: LIST? OF STRING?, unique :: BOOLEAN?, action :: STRING?)

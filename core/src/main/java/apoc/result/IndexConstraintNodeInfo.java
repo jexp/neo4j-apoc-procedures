@@ -9,7 +9,7 @@ public class IndexConstraintNodeInfo {
 
     public final String name;
 
-    public final String label;
+    public final Object label;
 
     public final List<String> properties;
 
@@ -40,7 +40,7 @@ public class IndexConstraintNodeInfo {
      * @param size
      * @param userDescription
      */
-    public IndexConstraintNodeInfo(String name, String label, List<String> properties, String status, String type, String failure, float populationProgress, long size, double valuesSelectivity, String userDescription) {
+    public IndexConstraintNodeInfo(String name, Object label, List<String> properties, String status, String type, String failure, float populationProgress, long size, double valuesSelectivity, String userDescription) {
         this.name = name;
         this.label = label;
         this.properties = properties;

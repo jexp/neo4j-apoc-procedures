@@ -373,6 +373,39 @@ public class SchemasEnterpriseFeaturesTest {
             return null;
         });
     }
+    
+    @Test
+    public void testSchemaNodeWithRelationshipsConstraintsAndViceVersa() {
+        session.writeTransaction(tx -> {
+            tx.run("CREATE CONSTRAINT ON ()-[like:LIKED]-() ASSERT exists(like.day)");
+            tx.run("CREATE CONSTRAINT ON (bar:Bar) ASSERT exists(bar.foobar)");
+            tx.commit();
+            return null;
+        });
+        
+        testResult(session, "CALL apoc.schema.relationships()", (result) -> {
+            Map<String, Object> r = result.next();
+            assertEquals("CONSTRAINT ON ()-[liked:LIKED]-() ASSERT exists(liked.day)", r.get("name"));
+            assertEquals("RELATIONSHIP_PROPERTY_EXISTENCE", r.get("type"));
+            assertEquals(asList("day"), r.get("properties"));
+            assertEquals(StringUtils.EMPTY, r.get("status"));
+            assertFalse(result.hasNext());
+        });
+        testResult(session, "CALL apoc.schema.nodes()", (result) -> {
+            Map<String, Object> r = result.next();
+            assertEquals("Bar", r.get("label"));
+            assertEquals("NODE_PROPERTY_EXISTENCE", r.get("type"));
+            assertEquals(asList("foobar"), r.get("properties"));
+            assertFalse(result.hasNext());
+        });
+        
+        session.writeTransaction(tx -> {
+            tx.run("DROP CONSTRAINT ON ()-[like:LIKED]-() ASSERT exists(like.day)");
+            tx.run("DROP CONSTRAINT ON (bar:Bar) ASSERT exists(bar.foobar)");
+            tx.commit();
+            return null;
+        });
+    }
 
     private List<String> expectedKeys(String... keys){
         return asList(keys);
