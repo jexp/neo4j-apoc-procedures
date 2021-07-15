@@ -25,7 +25,7 @@ public class Json {
     public static String NODE = "node";
     public static String RELATIONSHIP = "relationship";
 
-    private Object writeJsonResult(Object value) {
+    public static Object writeJsonResult(Object value) {
         Meta.Types type = Meta.Types.of(value);
         switch (type) {
             case NODE:
@@ -37,7 +37,7 @@ public class Json {
                         .map(i-> i instanceof Node ? nodeToMap((Node) i) : relToMap((Relationship) i))
                         .collect(Collectors.toList()));
             case LIST:
-                return Convert.convertToList(value).stream().map(this::writeJsonResult).collect(Collectors.toList());
+                return Convert.convertToList(value).stream().map(Json::writeJsonResult).collect(Collectors.toList());
             case MAP:
                 return ((Map<String, Object>) value).entrySet()
                         .stream()
@@ -49,7 +49,7 @@ public class Json {
         }
     }
 
-    private Map<String,Object> relToMap(Relationship rel) {
+    private static Map<String,Object> relToMap(Relationship rel) {
         Map<String, Object> mapRel = map(
                 "id", String.valueOf(rel.getId()),
                 "type", RELATIONSHIP,
@@ -60,7 +60,7 @@ public class Json {
         return mapWithOptionalProps(mapRel, rel.getAllProperties());
     }
 
-    private Map<String,Object> nodeToMap(Node node) {
+    private static Map<String,Object> nodeToMap(Node node) {
         Map<String, Object> mapNode = map("id", String.valueOf(node.getId()));
 
         mapNode.put("type", NODE);
@@ -71,7 +71,7 @@ public class Json {
         return mapWithOptionalProps(mapNode, node.getAllProperties());
     }
 
-    private Map<String, Object> mapWithOptionalProps(Map<String,Object> mapEntity, Map<String,Object> props) {
+    private static Map<String, Object> mapWithOptionalProps(Map<String,Object> mapEntity, Map<String,Object> props) {
         if (!props.isEmpty()) {
             mapEntity.put("properties", props);
         }

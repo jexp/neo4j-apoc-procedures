@@ -1,0 +1,28 @@
+Given an arrow file named `test.arrow` that contains people and their properties:
+
+.test.arrow
+----
+name,age,beverage
+Selma,9,Soda
+Rana,12,Tea,Milk
+Selina,19,Cola
+----
+
+We'll place this file into the `import` directory of our Neo4j instance.
+
+We can load this file and return the contents by running the following query:
+
+[source, cypher]
+----
+CALL apoc.load.arrow('test.arrow') YIELD value
+RETURN value;
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| value
+| {name: "Selma", age: "9", beverage: "Soda"}
+| {name: "Rana", age: "12", beverage: "Tea;Milk"}
+| {name: "Selina", age: "19", beverage: "Cola"}
+|===

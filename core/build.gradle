@@ -138,6 +138,11 @@ dependencies {
     // there is a compatibility problem between the Guava Library used by HDFS, Google Cloud Storage and Reflections; the only version that fits for all is the following
     compile group: 'com.google.guava', name: 'guava', version: '20.0'
 
+    compileOnly group: 'org.apache.arrow', name: 'arrow-vector', version: '3.0.0'
+    compileOnly group: 'org.apache.arrow', name: 'arrow-memory-netty', version: '3.0.0'
+    testCompile group: 'org.apache.arrow', name: 'arrow-vector', version: '3.0.0'
+    testCompile group: 'org.apache.arrow', name: 'arrow-memory-netty', version: '3.0.0'
+
     configurations.all {
         exclude group: 'org.slf4j', module: 'slf4j-nop'
     }

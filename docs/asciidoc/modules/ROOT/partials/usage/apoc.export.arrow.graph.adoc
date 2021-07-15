@@ -1,0 +1,41 @@
+The procedure expose an Arrow file of rows with the following structure
+- `<id>`: for node id
+- `<labels>`: list of labels
+- `<source.id>`: source node id (in case of relationship)
+- `<target.id>`: target node id (in case of relationship)
+- `<type>`: for relationship type
+- the list of properties of nodes and relationships flattened as table
+
+So for the following query:
+
+[source,cypher]
+----
+CREATE (f:User {name:'Adam',age:42,male:true,kids:['Sam','Anna','Grace'], born:localdatetime('2015185T19:32:24'), place:point({latitude: 13.1, longitude: 33.46789})})-[:KNOWS {since: 1993, bffSince: duration('P5M1.5D')}]->(b:User {name:'Jim',age:42}),(c:User {age:12}),(d:Another {foo: 'bar'})
+----
+
+With this query:
+
+[source,cypher]
+----
+CALL apoc.graph.fromDB('neo4j',{}) yield graph
+CALL apoc.export.arrow.graph('my_file.arrow', graph) YIELD file, source, format,
+    nodes, relationships, properties,
+    time, rows, batchSize,
+    batches, done, data
+----
+
+We'll have an arrow file with the following columns:
+
+- `<id>`
+- `<labels>`
+- `<source.id>`
+- `<target.id>`
+- `<type>`
+- `name`
+- `age`
+- `male`
+- `kids`
+- `born`
+- `place`
+- `since`
+- `bffSince`

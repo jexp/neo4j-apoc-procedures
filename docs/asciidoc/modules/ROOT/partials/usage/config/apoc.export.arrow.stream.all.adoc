@@ -1,0 +1,8 @@
+The procedure support the following config parameters:
+
+.Config parameters
+[opts=header]
+|===
+| name | type | default | description
+| batchSize | Integer | 2000 | the batch size of the ArrowStreamWriter
+|===
