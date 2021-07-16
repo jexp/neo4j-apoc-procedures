@@ -8,6 +8,7 @@ import apoc.export.util.MetaInformation;
 import apoc.export.util.Reporter;
 import apoc.result.ProgressInfo;
 import com.opencsv.CSVWriter;
+import org.apache.commons.lang.StringUtils;
 import org.neo4j.cypher.export.SubGraph;
 import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -144,8 +145,8 @@ public class CsvFormat implements Format {
     }
 
     public void writeAll(SubGraph graph, Reporter reporter, ExportConfig config, CSVWriter out) {
-        Map<String,Class> nodePropTypes = collectPropTypesForNodes(graph);
-        Map<String,Class> relPropTypes = collectPropTypesForRelationships(graph);
+        Map<String, Class> nodePropTypes = collectPropTypesForNodes(graph, db, config);
+        Map<String, Class> relPropTypes = collectPropTypesForRelationships(graph, db, config);
         List<String> nodeHeader = generateHeader(nodePropTypes, config.useTypes(), NODE_HEADER_FIXED_COLUMNS);
         List<String> relHeader = generateHeader(relPropTypes, config.useTypes(), REL_HEADER_FIXED_COLUMNS);
         List<String> header = new ArrayList<>(nodeHeader);
@@ -264,11 +265,6 @@ public class CsvFormat implements Format {
         }
     }
 
-    public void writeAll2(SubGraph graph, Reporter reporter, ExportConfig config, CSVWriter out) {
-        writeNodes(graph, out, reporter,config);
-        writeRels(graph, out, reporter,config);
-    }
-
     private List<String> generateHeader(Map<String, Class> propTypes, boolean useTypes, String... starters) {
         List<String> result = new ArrayList<>();
         if (useTypes) {
@@ -285,15 +281,6 @@ public class CsvFormat implements Format {
                 .sorted()
                 .collect(Collectors.toList()));
         return result;
-    }
-
-    private void writeNodes(SubGraph graph, CSVWriter out, Reporter reporter, ExportConfig config) {
-        Map<String,Class> nodePropTypes = collectPropTypesForNodes(graph);
-        List<String> nodeHeader = generateHeader(nodePropTypes, config.useTypes(), NODE_HEADER_FIXED_COLUMNS);
-        String[] header = nodeHeader.toArray(new String[nodeHeader.size()]);
-        out.writeNext(header, applyQuotesToAll); // todo types
-        int cols = header.length;
-        writeNodes(graph, out, reporter, nodeHeader.subList(NODE_HEADER_FIXED_COLUMNS.length, nodeHeader.size()), cols, config.getBatchSize(), config.getDelim());
     }
 
     private void writeNodes(SubGraph graph, CSVWriter out, Reporter reporter, List<String> header, int cols, int batchSize, String delimiter) {
@@ -326,15 +313,6 @@ public class CsvFormat implements Format {
             }
             offset++;
         }
-    }
-
-    private void writeRels(SubGraph graph, CSVWriter out, Reporter reporter, ExportConfig config) {
-        Map<String,Class> relPropTypes = collectPropTypesForRelationships(graph);
-        List<String> header = generateHeader(relPropTypes, config.useTypes(), REL_HEADER_FIXED_COLUMNS);
-        out.writeNext(header.toArray(new String[header.size()]), applyQuotesToAll);
-        int cols = header.size();
-        int offset = 0;
-        writeRels(graph, out, reporter, header.subList(REL_HEADER_FIXED_COLUMNS.length, header.size()), cols, offset, config.getBatchSize(), config.getDelim());
     }
 
     private void writeRels(SubGraph graph, CSVWriter out, Reporter reporter, List<String> relHeader, int cols, int offset, int batchSize, String delimiter) {
