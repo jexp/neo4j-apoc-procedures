@@ -75,11 +75,11 @@ public class SignatureTest {
         InputStream signatures = Util.class.getClassLoader().getResourceAsStream("signatures.csv");
         try (CSVReader reader = new CSVReaderBuilder(new InputStreamReader(signatures)).withSkipLines(1).build()) {
             for (String[] line : reader) {
-                SignatureParser.ProcedureContext signature = sigs.parseProcedure(line[1]);
-                ProcedureSignature ps = sigs.toProcedureSignature(signature);
-                if (ps != null) {
+                try {
+                    SignatureParser.ProcedureContext signature = sigs.parseProcedure(line[1]);
+                    ProcedureSignature ps = sigs.toProcedureSignature(signature);
                     assertEquals(line[0], ps.name().toString());
-                } else {
+                } catch (RuntimeException e) {
                     System.out.println("failed parsing " + line[0] + " -> " + line[1]);
                 }
             }

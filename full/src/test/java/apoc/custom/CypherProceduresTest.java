@@ -5,6 +5,7 @@ import apoc.SystemLabels;
 import apoc.SystemPropertyKeys;
 import apoc.util.StatusCodeMatcher;
 import apoc.util.TestUtil;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,13 +22,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static apoc.custom.CypherProcedures.ERROR_MISMATCHED_INPUTS;
+import static apoc.custom.CypherProcedures.ERROR_MISMATCHED_OUTPUTS;
 import static apoc.custom.CypherProceduresHandler.FUNCTION;
 import static apoc.custom.CypherProceduresHandler.PROCEDURE;
+import static apoc.custom.Signatures.SIGNATURE_SYNTAX_ERROR;
+import static apoc.util.TestUtil.testCall;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author mh
@@ -193,6 +199,13 @@ public class CypherProceduresTest  {
         db.executeTransactionally("call apoc.custom.asProcedure('answer','create path=(node)-[relationship:FOO]->() return node, relationship, path','write', [['node','Node'], ['relationship','RELATIONSHIP'], ['path','PATH']], [])");
         TestUtil.testCall(db, "call custom.answer()", (row) -> {});
     }
+    
+    @Test
+    public void testWrongMode() {
+        assertProcedureFails("The query execution type is READ_WRITE, but you provided mode READ.\n" +
+                        "Supported modes are [READ, WRITE, WRITE]",
+                "call apoc.custom.asProcedure('answer','create path=(node)-[relationship:FOO]->() return node, relationship, path','read', [['node','Node'], ['relationship','RELATIONSHIP'], ['path','PATH']], [])");
+    }
 
     @Test
     public void registerSimpleStatementFunction() throws Exception {
@@ -202,18 +215,13 @@ public class CypherProceduresTest  {
         TestUtil.testCall(db, "return custom.answer2() as row", (row) -> assertEquals(42L, row.get("row")));
     }
 
-    @Test(expected = QueryExecutionException.class)
+    @Test
     public void registerSimpleStatementFunctionWithOneChar() throws Exception {
         db.executeTransactionally("call apoc.custom.asFunction('a','RETURN 42 as answer')");
         TestUtil.testCall(db, "return custom.a() as row", (row) -> assertEquals(42L, ((Map)((List)row.get("row")).get(0)).get("answer")));
-        try {
-            db.executeTransactionally("CALL apoc.custom.declareFunction('b() :: STRING','RETURN 42 as answer')");
-        } catch (QueryExecutionException e) {
-            String expectedMessage = "Failed to invoke procedure `apoc.custom.declareFunction`: " +
-                    "Caused by: java.lang.IllegalStateException: Unsupported procedure name, the procedure must have at least two chars";
-            assertEquals(expectedMessage, e.getMessage());
-            throw e;
-        }
+        final String procedureSignature = "b() :: STRING";
+        assertProcedureFails(String.format(SIGNATURE_SYNTAX_ERROR, procedureSignature),
+                "CALL apoc.custom.declareFunction('" + procedureSignature + "','RETURN 42 as answer')");
     }
 
     @Test
@@ -610,5 +618,100 @@ public class CypherProceduresTest  {
 
         // when
         TestUtil.singleResultFirstColumn(db, "return custom.answer()");
+    }
+
+    @Test
+    public void shouldFailWithMismatchedParameters() {
+        // input mismatch
+        assertProcedureFails(ERROR_MISMATCHED_INPUTS,
+                "call apoc.custom.asFunction('answer','RETURN $input as answer','long',[['ajeje','number']])");
+        assertProcedureFails(ERROR_MISMATCHED_INPUTS,
+                "call apoc.custom.asProcedure('answer','RETURN $one as one, $two as two','read',null,[['one','number']])");
+        assertProcedureFails(ERROR_MISMATCHED_INPUTS,
+                "call apoc.custom.declareFunction('double(wrong::INT) :: INT','RETURN $input*2 as answer')");
+        assertProcedureFails(ERROR_MISMATCHED_INPUTS,
+                "call apoc.custom.declareProcedure('sum(input::INT, invalid::INT) :: (answer::INT)','RETURN $first + $second AS answer')");
+        // output mismatch
+        assertProcedureFails(ERROR_MISMATCHED_OUTPUTS,
+                "call apoc.custom.asProcedure('answer','RETURN $one as one, $two as two','read',[['one','number']],[['one','number'], ['two','number']])");
+        assertProcedureFails(ERROR_MISMATCHED_OUTPUTS,
+                "call apoc.custom.declareProcedure('sum(first::INT, second::INT) :: (something::INT)','RETURN $first + $second AS answer')");
+    }
+
+    @Test(expected = QueryExecutionException.class)
+    public void shouldCreateAVoidProcedure() {
+        // I create a function to pass later in VOID query 
+        final String functionName = "toDelete";
+        final String queryFunction = String.format("RETURN custom.%s() AS num", functionName);
+        db.executeTransactionally("call apoc.custom.asFunction('" + functionName + "', 'return 10', 'INT')");
+        testCall(db, queryFunction, row -> assertEquals(10L, row.get("num")));
+
+        // now I create a custom procedure with VOID return 
+        db.executeTransactionally("call apoc.custom.declareProcedure('myVoidProc(name :: STRING) :: VOID','call apoc.custom.removeFunction($name)')");
+        db.executeTransactionally("CALL custom.myVoidProc('" + functionName + "')");
+        db.executeTransactionally("call db.clearQueryCaches()");
+        testCall(db, queryFunction, row -> fail("Should fail because of unknown function"));
+    }
+    
+    @Test
+    public void shouldFailDeclareFunctionAndProcedureWithInvalidParameterTypes() {
+        final String procedureStatementInvalidInput = "sum(input:: INVALID) :: (answer::INT)";
+        assertProcedureFails(String.format(SIGNATURE_SYNTAX_ERROR, procedureStatementInvalidInput),
+                "call apoc.custom.declareProcedure('" + procedureStatementInvalidInput + "','RETURN $input AS input')");
+        final String functionStatementInvalidInput = "double(input :: INVALID) :: INT";
+        assertProcedureFails(String.format(SIGNATURE_SYNTAX_ERROR, functionStatementInvalidInput),
+                "call apoc.custom.declareFunction('" + functionStatementInvalidInput + "','RETURN $input*2 as answer')");
+
+        final String procedureStatementInvalidOutput = "myProc(input :: INTEGER) :: (sum :: DUNNO)";
+        assertProcedureFails(String.format(SIGNATURE_SYNTAX_ERROR, procedureStatementInvalidOutput), 
+                "call apoc.custom.declareProcedure('" + procedureStatementInvalidOutput + "','RETURN $input AS sum')");
+        final String functionStatementInvalidOutput = "myFunc(val :: INTEGER) :: DUNNO";
+        assertProcedureFails(String.format(SIGNATURE_SYNTAX_ERROR, functionStatementInvalidOutput),
+                "CALL apoc.custom.declareFunction('" + functionStatementInvalidOutput + "', 'RETURN $val')");
+    }
+
+    @Test
+    public void shouldCreateFunctionWithDefaultParameters() {
+        // default inputs
+        db.executeTransactionally("CALL apoc.custom.declareFunction('multiParDeclareFun(params = {} :: MAP) :: INT ', 'RETURN $one + $two as sum')");
+        TestUtil.testCall(db, "return custom.multiParDeclareFun({one:2, two: 3}) as row", (row) -> assertEquals(5L, row.get("row")));
+        
+        db.executeTransactionally("CALL apoc.custom.declareProcedure('multiParDeclareProc(params = {} :: MAP) :: (sum :: INT) ', 'RETURN $one + $two + $three as sum')");
+        TestUtil.testCall(db, "call custom.multiParDeclareProc({one:2, two: 3, three: 4})", (row) -> assertEquals(9L, row.get("sum")));
+        
+        db.executeTransactionally("call apoc.custom.asFunction('multiParFun','RETURN $one + $two as sum', 'long')");
+        TestUtil.testCall(db, "return custom.multiParFun({one:2, two: 4}) as row", (row) -> assertEquals(6L, row.get("row")));
+        
+        db.executeTransactionally("call apoc.custom.asProcedure('multiParProc','RETURN $one + $two as sum', 'read', [['sum', 'int']])");
+        TestUtil.testCall(db, "call custom.multiParProc({one:2, two: 3})", (row) -> assertEquals(5L, row.get("sum")));
+        
+        // default outputs
+        db.executeTransactionally("CALL apoc.custom.declareProcedure('declareDefaultOut(one :: INTEGER, two :: INTEGER) :: (row :: MAP) ', 'RETURN $one + $two as sum')");
+        TestUtil.testCall(db, "call custom.declareDefaultOut(5, 3)", (row) -> assertEquals(8L, ((Map<String, Object>)row.get("row")).get("sum")));
+
+        db.executeTransactionally("call apoc.custom.asProcedure('asDefaultOut','RETURN $one + $two as sum', 'read', [['row', 'MAP']], [['one', 'INTEGER'], ['two', 'INTEGER']])");
+        TestUtil.testCall(db, "call custom.asDefaultOut(6,4)", (row) -> assertEquals(10L, ((Map<String, Object>)row.get("row")).get("sum")));
+    }
+    
+    @Test
+    public void testIssue2032() {
+        String functionSignature = "foobar(xx::NODE, y::NODE) ::(NODE)";
+        assertProcedureFails(String.format(SIGNATURE_SYNTAX_ERROR, functionSignature), 
+                "CALL apoc.custom.declareFunction('" + functionSignature + "', 'MATCH (n) RETURN n limit 1');");
+        
+        String procedureSignature = "testFail(first::INT, s::INT) :: (answer::INT)";
+        assertProcedureFails(String.format(SIGNATURE_SYNTAX_ERROR, procedureSignature), 
+                "call apoc.custom.declareProcedure('" + procedureSignature + "','RETURN $first + $s AS answer')");
+    }
+    
+
+    private void assertProcedureFails(String expectedMessage, String query) {
+        try {
+            testCall(db, query, row -> fail("The test should fail because of: " + expectedMessage));
+        } catch (QueryExecutionException e) {
+            Throwable except = ExceptionUtils.getRootCause(e);
+            assertTrue(except instanceof RuntimeException);
+            assertTrue(except.getMessage().contains(expectedMessage));
+        }
     }
 }

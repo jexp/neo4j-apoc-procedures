@@ -90,6 +90,8 @@ public class CypherProceduresHandler extends LifecycleAdapter implements Availab
     public static final String CUSTOM_PROCEDURES_REFRESH = "apoc.custom.procedures.refresh";
     public static final List<FieldSignature> DEFAULT_INPUTS = singletonList(FieldSignature.inputField("params", NTMap, DefaultParameterValue.ntMap(Collections.emptyMap())));
     public static final List<FieldSignature> DEFAULT_MAP_OUTPUT = singletonList(FieldSignature.inputField("row", NTMap));
+    public static final String ERROR_INVALID_TYPE = "Invalid type name." +
+            "\nCheck the documentation to see possible values: https://neo4j.com/labs/apoc/4.1/cypher-execution/cypher-based-procedures-functions/";
 
     private final GraphDatabaseAPI api;
     private final Log log;

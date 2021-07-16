@@ -16,6 +16,8 @@ import static org.neo4j.internal.kernel.api.procs.Neo4jTypes.*;
 
 public class Signatures {
 
+    public static final String SIGNATURE_SYNTAX_ERROR = "Syntax error(s) in signature definition %s. " +
+            "\nNote that procedure/function name, input and output names must have at least 2 character:\n";
     private final String prefix;
 
     public Signatures(String prefix) {
@@ -27,26 +29,38 @@ public class Signatures {
     }
 
     public SignatureParser.ProcedureContext parseProcedure(String procedureSignatureText) {
-        return parse(procedureSignatureText).procedure();
+        List<String> errors = new ArrayList<>();
+        SignatureParser signatureParser = parse(procedureSignatureText, errors);
+        final SignatureParser.ProcedureContext signatureParsed = signatureParser.procedure();
+        checkSignatureSyntax(procedureSignatureText, errors);
+        return signatureParsed;
     }
 
     public SignatureParser.FunctionContext parseFunction(String functionSignatureText) {
-        return parse(functionSignatureText).function();
+        List<String> errors = new ArrayList<>();
+        SignatureParser signatureParser = parse(functionSignatureText, errors);
+        final SignatureParser.FunctionContext signatureParsed = signatureParser.function();
+        checkSignatureSyntax(functionSignatureText, errors);
+        return signatureParsed;
     }
 
-    public SignatureParser parse(String signatureText) {
+    private void checkSignatureSyntax(String functionSignatureText, List<String> errors) {
+        if (!errors.isEmpty()) {
+            throw new RuntimeException(String.format(SIGNATURE_SYNTAX_ERROR, functionSignatureText) 
+                    + String.join("\n", errors));
+        }
+    }
+
+    private SignatureParser parse(String signatureText, List<String> errors) {
         CodePointCharStream inputStream = CharStreams.fromString(signatureText);
         SignatureLexer signatureLexer = new SignatureLexer(inputStream);
         CommonTokenStream commonTokenStream = new CommonTokenStream(signatureLexer);
-        List<String> errors = new ArrayList<>();
         SignatureParser signatureParser = new SignatureParser(commonTokenStream);
         signatureParser.addErrorListener(new BaseErrorListener() {
             public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
                 errors.add("line " + line + ":" + charPositionInLine + " " + msg);
             }
         });
-        if (signatureParser.getNumberOfSyntaxErrors() > 0)
-            throw new RuntimeException("Syntax Error in " + signatureText + " : " + errors.toString());
         return signatureParser;
     }
 
@@ -56,13 +70,8 @@ public class Signatures {
 
     public ProcedureSignature toProcedureSignature(SignatureParser.ProcedureContext signature, String description, Mode mode) {
         QualifiedName name = new QualifiedName(namespace(signature.namespace()), name(signature.name()));
-
-        if (signature.results() == null) {
-            System.out.println("signature = " + signature);
-            return null;
-        }
         List<FieldSignature> outputSignature =
-                signature.results().empty() != null ? Collections.emptyList() :
+                signature.results().empty() != null ? ProcedureSignature.VOID :
                         signature.results().result().stream().map(p ->
                                 FieldSignature.outputField(name(p.name()), type(p.type()))).collect(Collectors.toList());
         // todo deprecated + default value
@@ -90,11 +99,6 @@ public class Signatures {
 
     public UserFunctionSignature toFunctionSignature(SignatureParser.FunctionContext signature, String description) {
         QualifiedName name = new QualifiedName(namespace(signature.namespace()), name(signature.name()));
-
-        if (signature.type() == null) {
-            System.out.println("signature = " + signature);
-            return null;
-        }
 
         Neo4jTypes.AnyType type = type(signature.type());
 
@@ -131,7 +135,6 @@ public class Signatures {
     }
 
     public String name(SignatureParser.NameContext ns) {
-        if(ns == null) throw new IllegalStateException("Unsupported procedure name, the procedure must have at least two chars");
         if (ns.IDENTIFIER() != null) return ns.IDENTIFIER().getText();
         if (ns.QUOTED_IDENTIFIER() != null) return ns.QUOTED_IDENTIFIER().getText(); // todo
         throw new IllegalStateException("Invalid Name " + ns);

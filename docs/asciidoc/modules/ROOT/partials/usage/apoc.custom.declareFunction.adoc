@@ -8,6 +8,8 @@ CALL apoc.custom.declareFunction(
 );
 ----
 
+NOTE: Function, input and output names must have at least 2 characters.
+
 We can use this function, as shown in the query below:
 
 [source,cypher]

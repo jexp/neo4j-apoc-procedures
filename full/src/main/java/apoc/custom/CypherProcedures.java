@@ -1,6 +1,10 @@
 package apoc.custom;
 
 import apoc.Extended;
+import org.apache.commons.lang3.StringUtils;
+import org.neo4j.graphdb.Notification;
+import org.neo4j.graphdb.QueryExecutionType;
+import org.neo4j.graphdb.Result;
 import org.neo4j.internal.helpers.collection.Iterables;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
@@ -8,6 +12,7 @@ import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
@@ -19,8 +24,12 @@ import org.neo4j.procedure.Mode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static apoc.custom.CypherProceduresHandler.*;
 
@@ -31,6 +40,10 @@ import static apoc.custom.CypherProceduresHandler.*;
 @Extended
 public class CypherProcedures {
 
+    // visible for testing
+    public static final String ERROR_MISMATCHED_INPUTS = "Required query parameters and input parameters provided don't correspond.";
+    public static final String ERROR_MISMATCHED_OUTPUTS = "Query results and output parameters provided don't correspond.";
+    
     @Context
     public GraphDatabaseAPI api;
 
@@ -59,6 +72,8 @@ public class CypherProcedures {
                             @Name(value= "description", defaultValue = "") String description
     ) throws ProcedureException {
         ProcedureSignature signature = cypherProceduresHandler.procedureSignature(name, mode, outputs, inputs, description);
+        Mode modeProcedure = cypherProceduresHandler.mode(mode);
+        validateProcedure(statement, signature.inputSignature(), signature.outputSignature(), modeProcedure);
         cypherProceduresHandler.storeProcedure(signature, statement);
     }
 
@@ -68,7 +83,9 @@ public class CypherProcedures {
                                  @Name(value = "mode", defaultValue = "read") String mode,
                                  @Name(value = "description", defaultValue = "") String description
     ) {
-        ProcedureSignature procedureSignature = new Signatures(PREFIX).asProcedureSignature(signature, description, cypherProceduresHandler.mode(mode));
+        Mode modeProcedure = cypherProceduresHandler.mode(mode);
+        ProcedureSignature procedureSignature = new Signatures(PREFIX).asProcedureSignature(signature, description, modeProcedure);
+        validateProcedure(statement, procedureSignature.inputSignature(), procedureSignature.outputSignature(), modeProcedure);
         if (!cypherProceduresHandler.registerProcedure(procedureSignature, statement)) {
             throw new IllegalStateException("Error registering procedure " + procedureSignature.name() + ", see log.");
         }
@@ -85,15 +102,17 @@ public class CypherProcedures {
                            @Name(value = "forceSingle", defaultValue = "false") boolean forceSingle,
                            @Name(value = "description", defaultValue = "") String description) throws ProcedureException {
         UserFunctionSignature signature = cypherProceduresHandler.functionSignature(name, output, inputs, description);
+        validateFunction(statement, signature.inputSignature());
         cypherProceduresHandler.storeFunction(signature, statement, forceSingle);
     }
 
     @Procedure(value = "apoc.custom.declareFunction", mode = Mode.WRITE)
     @Description("apoc.custom.declareFunction(signature, statement, forceSingle, description) - register a custom cypher function")
-    public void asFunction(@Name("signature") String signature, @Name("statement") String statement,
+    public void declareFunction(@Name("signature") String signature, @Name("statement") String statement,
                            @Name(value = "forceSingle", defaultValue = "false") boolean forceSingle,
                            @Name(value = "description", defaultValue = "") String description) throws ProcedureException {
         UserFunctionSignature userFunctionSignature = new Signatures(PREFIX).asFunctionSignature(signature, description);
+        validateFunction(statement, userFunctionSignature.inputSignature());
         if (!cypherProceduresHandler.registerFunction(userFunctionSignature, statement, forceSingle)) {
             throw new IllegalStateException("Error registering function " + signature + ", see log.");
         }
@@ -146,6 +165,63 @@ public class CypherProcedures {
     public void removeFunction(@Name("name") String name) {
         Objects.requireNonNull(name, "name");
         cypherProceduresHandler.removeFunction(name);
+    }
+
+    private void validateFunction(String statement, List<FieldSignature> input) {
+        validateProcedure(statement, input, DEFAULT_MAP_OUTPUT, null);
+    }
+    
+    private void validateProcedure(String statement, List<FieldSignature> input, List<FieldSignature> output, Mode mode) {
+        
+        final Set<String> inputSet = input.stream().map(FieldSignature::name).collect(Collectors.toSet());
+        final Set<String> outputSet = output.stream().map(FieldSignature::name).collect(Collectors.toSet());
+
+        api.executeTransactionally("EXPLAIN " + statement, 
+                inputSet.stream().collect(Collectors.toMap(i -> i, i -> i)),
+                result -> {
+                    if (!DEFAULT_MAP_OUTPUT.equals(output)) {
+                        checkOutputParams(outputSet, result.columns());
+                    }
+                    if (!DEFAULT_INPUTS.equals(input)) {
+                        checkInputParams(result);
+                    }
+                    if (mode != null) {
+                        checkMode(result.getQueryExecutionType().queryType(), mode);
+                    }
+                    return null;
+                });
+    }
+
+    private void checkMode(QueryExecutionType.QueryType queryType, Mode mode) {
+        Map<QueryExecutionType.QueryType, Mode> map = Map.of(QueryExecutionType.QueryType.WRITE, Mode.WRITE,
+                QueryExecutionType.QueryType.READ_ONLY, Mode.READ,
+                QueryExecutionType.QueryType.READ_WRITE, Mode.WRITE);
+        
+        if (!map.get(queryType).equals(mode)) {
+            throw new RuntimeException(String.format("The query execution type is %s, but you provided mode %s.\n" +
+                            "Supported modes are %s",
+                    queryType.name(), 
+                    mode.name(), 
+                    map.values().stream().sorted().collect(Collectors.toList()).toString()));
+        }
+    }
+
+
+    private void checkOutputParams(Set<String> outputSet, List<String> columns) {
+        if (!Set.copyOf(columns).equals(outputSet)) {
+            throw new RuntimeException(ERROR_MISMATCHED_OUTPUTS);
+        }
+    }
+    
+    private void checkInputParams(Result result) {
+        String missingParameters = StreamSupport.stream(result.getNotifications().spliterator(), false)
+                .filter(i -> i.getCode().equals(Status.Statement.ParameterMissing.code().serialize()))
+                .map(Notification::getDescription)
+                .collect(Collectors.joining(System.lineSeparator()));
+
+        if (StringUtils.isNotBlank(missingParameters)) {
+            throw new RuntimeException(ERROR_MISMATCHED_INPUTS);
+        }
     }
 
     private List<List<String>> convertInputSignature(List<FieldSignature> signatures) {
