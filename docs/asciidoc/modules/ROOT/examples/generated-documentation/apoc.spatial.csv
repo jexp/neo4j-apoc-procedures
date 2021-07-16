@@ -1,5 +1,21 @@
-¦type¦qualified name¦signature¦description
-¦procedure¦apoc.spatial.geocode¦apoc.spatial.geocode(location :: STRING?, maxResults = 100 :: INTEGER?, quotaException = false :: BOOLEAN?) :: (location :: MAP?, data :: MAP?, latitude :: FLOAT?, longitude :: FLOAT?, description :: STRING?)¦apoc.spatial.geocode('address') YIELD location, latitude, longitude, description, osmData - look up geographic location of address from a geocoding service (the default one is OpenStreetMap)
-¦procedure¦apoc.spatial.geocodeOnce¦apoc.spatial.geocodeOnce(location :: STRING?) :: (location :: MAP?, data :: MAP?, latitude :: FLOAT?, longitude :: FLOAT?, description :: STRING?)¦apoc.spatial.geocodeOnce('address') YIELD location, latitude, longitude, description, osmData - look up geographic location of address from a geocoding service (the default one is OpenStreetMap)
-¦procedure¦apoc.spatial.reverseGeocode¦apoc.spatial.reverseGeocode(latitude :: FLOAT?, longitude :: FLOAT?, quotaException = false :: BOOLEAN?) :: (location :: MAP?, data :: MAP?, latitude :: FLOAT?, longitude :: FLOAT?, description :: STRING?)¦apoc.spatial.reverseGeocode(latitude,longitude) YIELD location, latitude, longitude, description - look up address from latitude and longitude from a geocoding service (the default one is OpenStreetMap)
-¦procedure¦apoc.spatial.sortByDistance¦apoc.spatial.sortByDistance(paths :: LIST? OF PATH?) :: (path :: PATH?, distance :: FLOAT?)¦apoc.spatial.sortPathsByDistance(List<Path>) sort the given paths based on the geo informations (lat/long) in ascending order
+¦Qualified Name¦Type¦Release
+|xref::overview/apoc.spatial/apoc.spatial.adoc[apoc.spatial.geocode icon:book[]]
+
+apoc.spatial.geocode('address') YIELD location, latitude, longitude, description, osmData - look up geographic location of address from a geocoding service (the default one is OpenStreetMap)
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.spatial/apoc.spatial.adoc[apoc.spatial.geocodeOnce icon:book[]]
+
+apoc.spatial.geocodeOnce('address') YIELD location, latitude, longitude, description, osmData - look up geographic location of address from a geocoding service (the default one is OpenStreetMap)
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.spatial/apoc.spatial.adoc[apoc.spatial.reverseGeocode icon:book[]]
+
+apoc.spatial.reverseGeocode(latitude,longitude) YIELD location, latitude, longitude, description - look up address from latitude and longitude from a geocoding service (the default one is OpenStreetMap)
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.spatial/apoc.spatial.adoc[apoc.spatial.sortByDistance icon:book[]]
+
+apoc.spatial.sortByDistance(List<Path>) sort the given paths based on the geo informations (lat/long) in ascending order
+|label:procedure[]
+|label:apoc-core[]

@@ -1,11 +1,51 @@
-¦type¦qualified name¦signature¦description
-¦procedure¦apoc.math.regr¦apoc.math.regr(label :: STRING?, propertyY :: STRING?, propertyX :: STRING?) :: (r2 :: FLOAT?, avgX :: FLOAT?, avgY :: FLOAT?, slope :: FLOAT?)¦apoc.math.regr(label, propertyY, propertyX) - It calculates the coefficient of determination (R-squared) for the values of propertyY and propertyX in the provided label
-¦function¦apoc.math.maxByte¦apoc.math.maxByte() :: (INTEGER?)¦apoc.math.maxByte() | return the maximum value an byte can have
-¦function¦apoc.math.maxDouble¦apoc.math.maxDouble() :: (FLOAT?)¦apoc.math.maxDouble() | return the largest positive finite value of type double
-¦function¦apoc.math.maxInt¦apoc.math.maxInt() :: (INTEGER?)¦apoc.math.maxInt() | return the maximum value an int can have
-¦function¦apoc.math.maxLong¦apoc.math.maxLong() :: (INTEGER?)¦apoc.math.maxLong() | return the maximum value a long can have
-¦function¦apoc.math.minByte¦apoc.math.minByte() :: (INTEGER?)¦apoc.math.minByte() | return the minimum value an byte can have
-¦function¦apoc.math.minDouble¦apoc.math.minDouble() :: (FLOAT?)¦apoc.math.minDouble() | return the smallest positive nonzero value of type double
-¦function¦apoc.math.minInt¦apoc.math.minInt() :: (INTEGER?)¦apoc.math.minInt() | return the minimum value an int can have
-¦function¦apoc.math.minLong¦apoc.math.minLong() :: (INTEGER?)¦apoc.math.minLong() | return the minimum value a long can have
-¦function¦apoc.math.round¦apoc.math.round(value :: FLOAT?, precision = 0 :: INTEGER?, mode = HALF_UP :: STRING?) :: (FLOAT?)¦apoc.math.round(value,[prec],mode=[CEILING,FLOOR,UP,DOWN,HALF_EVEN,HALF_DOWN,HALF_UP,DOWN,UNNECESSARY])
+¦Qualified Name¦Type¦Release
+|xref::overview/apoc.math/apoc.math.adoc[apoc.math.regr icon:book[]]
+
+apoc.math.regr(label, propertyY, propertyX) - It calculates the coefficient of determination (R-squared) for the values of propertyY and propertyX in the provided label
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.math/apoc.math.adoc[apoc.math.maxByte icon:book[]]
+
+apoc.math.maxByte() \| return the maximum value an byte can have
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.math/apoc.math.adoc[apoc.math.maxDouble icon:book[]]
+
+apoc.math.maxDouble() \| return the largest positive finite value of type double
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.math/apoc.math.adoc[apoc.math.maxInt icon:book[]]
+
+apoc.math.maxInt() \| return the maximum value an int can have
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.math/apoc.math.adoc[apoc.math.maxLong icon:book[]]
+
+apoc.math.maxLong() \| return the maximum value a long can have
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.math/apoc.math.adoc[apoc.math.minByte icon:book[]]
+
+apoc.math.minByte() \| return the minimum value an byte can have
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.math/apoc.math.adoc[apoc.math.minDouble icon:book[]]
+
+apoc.math.minDouble() \| return the smallest positive nonzero value of type double
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.math/apoc.math.adoc[apoc.math.minInt icon:book[]]
+
+apoc.math.minInt() \| return the minimum value an int can have
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.math/apoc.math.adoc[apoc.math.minLong icon:book[]]
+
+apoc.math.minLong() \| return the minimum value a long can have
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.math/apoc.math.adoc[apoc.math.round icon:book[]]
+
+apoc.math.round(value,[precision],mode=['CEILING','FLOOR','UP','DOWN','HALF_EVEN','HALF_DOWN','HALF_UP','DOWN','UNNECESSARY'])
+|label:function[]
+|label:apoc-core[]

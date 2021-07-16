@@ -1,18 +1,86 @@
-¦type¦qualified name¦signature¦description
-¦procedure¦apoc.cypher.doIt¦apoc.cypher.doIt(cypher :: STRING?, params :: MAP?) :: (value :: MAP?)¦apoc.cypher.doIt(fragment, params) yield value - executes writing fragment with the given parameters
-¦procedure¦apoc.cypher.mapParallel¦apoc.cypher.mapParallel(fragment :: STRING?, params :: MAP?, list :: LIST? OF ANY?) :: (value :: MAP?)¦apoc.cypher.mapParallel(fragment, params, list-to-parallelize) yield value - executes fragment in parallel batches with the list segments being assigned to _
-¦procedure¦apoc.cypher.mapParallel2¦apoc.cypher.mapParallel2(fragment :: STRING?, params :: MAP?, list :: LIST? OF ANY?, partitions :: INTEGER?, timeout = 10 :: INTEGER?) :: (value :: MAP?)¦apoc.cypher.mapParallel2(fragment, params, list-to-parallelize) yield value - executes fragment in parallel batches with the list segments being assigned to _
-¦procedure¦apoc.cypher.parallel¦apoc.cypher.parallel(fragment :: STRING?, params :: MAP?, parallelizeOn :: STRING?) :: (value :: MAP?)¦
-¦procedure¦apoc.cypher.parallel2¦apoc.cypher.parallel2(fragment :: STRING?, params :: MAP?, parallelizeOn :: STRING?) :: (value :: MAP?)¦
-¦procedure¦apoc.cypher.run¦apoc.cypher.run(cypher :: STRING?, params :: MAP?) :: (value :: MAP?)¦apoc.cypher.run(fragment, params) yield value - executes reading fragment with the given parameters - currently no schema operations
-¦procedure¦apoc.cypher.runFile¦apoc.cypher.runFile(file :: STRING?, config = {} :: MAP?) :: (row :: INTEGER?, result :: MAP?)¦apoc.cypher.runFile(file or url,[{statistics:true,timeout:10,parameters:{}}]) - runs each statement in the file, all semicolon separated - currently no schema operations
-¦procedure¦apoc.cypher.runFiles¦apoc.cypher.runFiles(file :: LIST? OF STRING?, config = {} :: MAP?) :: (row :: INTEGER?, result :: MAP?)¦apoc.cypher.runFiles([files or urls],[{statistics:true,timeout:10,parameters:{}}])) - runs each statement in the files, all semicolon separated
-¦procedure¦apoc.cypher.runMany¦apoc.cypher.runMany(cypher :: STRING?, params :: MAP?, config = {} :: MAP?) :: (row :: INTEGER?, result :: MAP?)¦apoc.cypher.runMany('cypher;\nstatements;',\{params},[{statistics:true,timeout:10}]) - runs each semicolon separated statement and returns summary - currently no schema operations
-¦procedure¦apoc.cypher.runSchema¦apoc.cypher.runSchema(cypher :: STRING?, params :: MAP?) :: (value :: MAP?)¦apoc.cypher.runSchema(statement, params) yield value - executes query schema statement with the given parameters
-¦procedure¦apoc.cypher.runSchemaFile¦apoc.cypher.runSchemaFile(file :: STRING?, config = {} :: MAP?) :: (row :: INTEGER?, result :: MAP?)¦apoc.cypher.runSchemaFile(file or url,[{statistics:true,timeout:10}]) - allows only schema operations, runs each schema statement in the file, all semicolon separated
-¦procedure¦apoc.cypher.runSchemaFiles¦apoc.cypher.runSchemaFiles(file :: LIST? OF STRING?, config = {} :: MAP?) :: (row :: INTEGER?, result :: MAP?)¦apoc.cypher.runSchemaFiles([files or urls],{statistics:true,timeout:10}) - allows only schema operations, runs each schema statement in the files, all semicolon separated
-¦procedure¦apoc.cypher.runTimeboxed¦apoc.cypher.runTimeboxed(cypher :: STRING?, params :: MAP?, timeout :: INTEGER?) :: (value :: MAP?)¦apoc.cypher.runTimeboxed('cypherStatement',\{params}, timeout) - abort kernelTransaction after timeout ms if not finished
-¦procedure¦apoc.cypher.runWrite¦apoc.cypher.runWrite(cypher :: STRING?, params :: MAP?) :: (value :: MAP?)¦apoc.cypher.runWrite(statement, params) yield value - alias for apoc.cypher.doIt
-¦function¦apoc.cypher.runFirstColumn¦apoc.cypher.runFirstColumn(cypher :: STRING?, params :: MAP?, expectMultipleValues = true :: BOOLEAN?) :: (ANY?)¦use either apoc.cypher.runFirstColumnMany for a list return or apoc.cypher.runFirstColumnSingle for returning the first row of the first column
-¦function¦apoc.cypher.runFirstColumnMany¦apoc.cypher.runFirstColumnMany(cypher :: STRING?, params :: MAP?) :: (LIST? OF ANY?)¦apoc.cypher.runFirstColumnMany(statement, params) - executes statement with given parameters, returns first column only collected into a list, params are available as identifiers
-¦function¦apoc.cypher.runFirstColumnSingle¦apoc.cypher.runFirstColumnSingle(cypher :: STRING?, params :: MAP?) :: (ANY?)¦apoc.cypher.runFirstColumnSingle(statement, params) - executes statement with given parameters, returns first element of the first column only, params are available as identifiers
+¦Qualified Name¦Type¦Release
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.doIt icon:book[]]
+
+apoc.cypher.doIt(fragment, params) yield value - executes writing fragment with the given parameters
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.mapParallel icon:book[]]
+
+apoc.cypher.mapParallel(fragment, params, list-to-parallelize) yield value - executes fragment in parallel batches with the list segments being assigned to _
+|label:procedure[]
+|label:apoc-full[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.mapParallel2 icon:book[]]
+
+apoc.cypher.mapParallel2(fragment, params, list-to-parallelize) yield value - executes fragment in parallel batches with the list segments being assigned to _
+|label:procedure[]
+|label:apoc-full[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.parallel icon:book[]]
+
+
+|label:procedure[]
+|label:apoc-full[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.parallel2 icon:book[]]
+
+
+|label:procedure[]
+|label:apoc-full[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.run icon:book[]]
+
+apoc.cypher.run(fragment, params) yield value - executes reading fragment with the given parameters - currently no schema operations
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.runFile icon:book[]]
+
+apoc.cypher.runFile(file or url,[{statistics:true,timeout:10,parameters:{}}]) - runs each statement in the file, all semicolon separated - currently no schema operations
+|label:procedure[]
+|label:apoc-full[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.runFiles icon:book[]]
+
+apoc.cypher.runFiles([files or urls],[{statistics:true,timeout:10,parameters:{}}])) - runs each statement in the files, all semicolon separated
+|label:procedure[]
+|label:apoc-full[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.runMany icon:book[]]
+
+apoc.cypher.runMany('cypher;\nstatements;',\{params},[{statistics:true,timeout:10}]) - runs each semicolon separated statement and returns summary - currently no schema operations
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.runSchemaFile icon:book[]]
+
+apoc.cypher.runSchemaFile(file or url,[{statistics:true,timeout:10}]) - allows only schema operations, runs each schema statement in the file, all semicolon separated
+|label:procedure[]
+|label:apoc-full[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.runSchemaFiles icon:book[]]
+
+apoc.cypher.runSchemaFiles([files or urls],{statistics:true,timeout:10}) - allows only schema operations, runs each schema statement in the files, all semicolon separated
+|label:procedure[]
+|label:apoc-full[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.runTimeboxed icon:book[]]
+
+apoc.cypher.runTimeboxed('cypherStatement',\{params}, timeout) - abort kernelTransaction after timeout ms if not finished
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.runFirstColumn icon:book[]]
+
+use either apoc.cypher.runFirstColumnMany for a list return or apoc.cypher.runFirstColumnSingle for returning the first row of the first column
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.runFirstColumnMany icon:book[]]
+
+apoc.cypher.runFirstColumnMany(statement, params) - executes statement with given parameters, returns first column only collected into a list, params are available as identifiers
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.runFirstColumnSingle icon:book[]]
+
+apoc.cypher.runFirstColumnSingle(statement, params) - executes statement with given parameters, returns first element of the first column only, params are available as identifiers
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.runSchema icon:book[]]
+
+apoc.cypher.runSchema(statement, params) yield value - executes query schema statement with the given parameters
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.cypher/apoc.cypher.adoc[apoc.cypher.runWrite icon:book[]]
+
+apoc.cypher.runWrite(statement, params) yield value - alias for apoc.cypher.doIt
+|label:procedure[]
+|label:apoc-core[]

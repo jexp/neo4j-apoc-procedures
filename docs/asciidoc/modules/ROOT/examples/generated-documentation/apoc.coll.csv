@@ -1,54 +1,271 @@
-¦type¦qualified name¦signature¦description
-¦procedure¦apoc.coll.elements¦apoc.coll.elements(values :: LIST? OF ANY?, limit = -1 :: INTEGER?, offset = 0 :: INTEGER?) :: (_1 :: ANY?, _2 :: ANY?, _3 :: ANY?, _4 :: ANY?, _5 :: ANY?, _6 :: ANY?, _7 :: ANY?, _8 :: ANY?, _9 :: ANY?, _10 :: ANY?, _1s :: STRING?, _2s :: STRING?, _3s :: STRING?, _4s :: STRING?, _5s :: STRING?, _6s :: STRING?, _7s :: STRING?, _8s :: STRING?, _9s :: STRING?, _10s :: STRING?, _1i :: INTEGER?, _2i :: INTEGER?, _3i :: INTEGER?, _4i :: INTEGER?, _5i :: INTEGER?, _6i :: INTEGER?, _7i :: INTEGER?, _8i :: INTEGER?, _9i :: INTEGER?, _10i :: INTEGER?, _1f :: FLOAT?, _2f :: FLOAT?, _3f :: FLOAT?, _4f :: FLOAT?, _5f :: FLOAT?, _6f :: FLOAT?, _7f :: FLOAT?, _8f :: FLOAT?, _9f :: FLOAT?, _10f :: FLOAT?, _1b :: BOOLEAN?, _2b :: BOOLEAN?, _3b :: BOOLEAN?, _4b :: BOOLEAN?, _5b :: BOOLEAN?, _6b :: BOOLEAN?, _7b :: BOOLEAN?, _8b :: BOOLEAN?, _9b :: BOOLEAN?, _10b :: BOOLEAN?, _1l :: LIST? OF ANY?, _2l :: LIST? OF ANY?, _3l :: LIST? OF ANY?, _4l :: LIST? OF ANY?, _5l :: LIST? OF ANY?, _6l :: LIST? OF ANY?, _7l :: LIST? OF ANY?, _8l :: LIST? OF ANY?, _9l :: LIST? OF ANY?, _10l :: LIST? OF ANY?, _1m :: MAP?, _2m :: MAP?, _3m :: MAP?, _4m :: MAP?, _5m :: MAP?, _6m :: MAP?, _7m :: MAP?, _8m :: MAP?, _9m :: MAP?, _10m :: MAP?, _1n :: NODE?, _2n :: NODE?, _3n :: NODE?, _4n :: NODE?, _5n :: NODE?, _6n :: NODE?, _7n :: NODE?, _8n :: NODE?, _9n :: NODE?, _10n :: NODE?, _1r :: RELATIONSHIP?, _2r :: RELATIONSHIP?, _3r :: RELATIONSHIP?, _4r :: RELATIONSHIP?, _5r :: RELATIONSHIP?, _6r :: RELATIONSHIP?, _7r :: RELATIONSHIP?, _8r :: RELATIONSHIP?, _9r :: RELATIONSHIP?, _10r :: RELATIONSHIP?, _1p :: PATH?, _2p :: PATH?, _3p :: PATH?, _4p :: PATH?, _5p :: PATH?, _6p :: PATH?, _7p :: PATH?, _8p :: PATH?, _9p :: PATH?, _10p :: PATH?, elements :: INTEGER?)¦apoc.coll.elements(list,limit,offset) yield _1,_2,..,_10,_1s,_2i,_3f,_4m,_5l,_6n,_7r,_8p - deconstruct subset of mixed list into identifiers of the correct type
-¦procedure¦apoc.coll.pairWithOffset¦apoc.coll.pairWithOffset(values :: LIST? OF ANY?, offset :: INTEGER?) :: (value :: LIST? OF ANY?)¦apoc.coll.pairWithOffset(values, offset) - returns a list of pairs defined by the offset
-¦procedure¦apoc.coll.partition¦apoc.coll.partition(values :: LIST? OF ANY?, batchSize :: INTEGER?) :: (value :: LIST? OF ANY?)¦apoc.coll.partition(list,batchSize)
-¦procedure¦apoc.coll.split¦apoc.coll.split(values :: LIST? OF ANY?, value :: ANY?) :: (value :: LIST? OF ANY?)¦apoc.coll.split(list,value) | splits collection on given values rows of lists, value itself will not be part of resulting lists
-¦procedure¦apoc.coll.zipToRows¦apoc.coll.zipToRows(list1 :: LIST? OF ANY?, list2 :: LIST? OF ANY?) :: (value :: LIST? OF ANY?)¦apoc.coll.zipToRows(list1,list2) - creates pairs like zip but emits one row per pair
-¦function¦apoc.coll.avg¦apoc.coll.avg(numbers :: LIST? OF NUMBER?) :: (FLOAT?)¦apoc.coll.avg([0.5,1,2.3])
-¦function¦apoc.coll.combinations¦apoc.coll.combinations(coll :: LIST? OF ANY?, minSelect :: INTEGER?, maxSelect = -1 :: INTEGER?) :: (LIST? OF ANY?)¦apoc.coll.combinations(coll, minSelect, maxSelect:minSelect) - Returns collection of all combinations of list elements of selection size between minSelect and maxSelect (default:minSelect), inclusive
-¦function¦apoc.coll.contains¦apoc.coll.contains(coll :: LIST? OF ANY?, value :: ANY?) :: (BOOLEAN?)¦apoc.coll.contains(coll, value) optimized contains operation (using a HashSet) (returns single row or not)
-¦function¦apoc.coll.containsAll¦apoc.coll.containsAll(coll :: LIST? OF ANY?, values :: LIST? OF ANY?) :: (BOOLEAN?)¦apoc.coll.containsAll(coll, values) optimized contains-all operation (using a HashSet) (returns single row or not)
-¦function¦apoc.coll.containsAllSorted¦apoc.coll.containsAllSorted(coll :: LIST? OF ANY?, values :: LIST? OF ANY?) :: (BOOLEAN?)¦apoc.coll.containsAllSorted(coll, value) optimized contains-all on a sorted list operation (Collections.binarySearch) (returns single row or not)
-¦function¦apoc.coll.containsDuplicates¦apoc.coll.containsDuplicates(coll :: LIST? OF ANY?) :: (BOOLEAN?)¦apoc.coll.containsDuplicates(coll) - returns true if a collection contains duplicate elements
-¦function¦apoc.coll.containsSorted¦apoc.coll.containsSorted(coll :: LIST? OF ANY?, value :: ANY?) :: (BOOLEAN?)¦apoc.coll.containsSorted(coll, value) optimized contains on a sorted list operation (Collections.binarySearch) (returns single row or not)
-¦function¦apoc.coll.different¦apoc.coll.different(values :: LIST? OF ANY?) :: (BOOLEAN?)¦apoc.coll.different(values) - returns true if values are different
-¦function¦apoc.coll.disjunction¦apoc.coll.disjunction(first :: LIST? OF ANY?, second :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.disjunction(first, second) - returns the disjunct set of the two lists
-¦function¦apoc.coll.dropDuplicateNeighbors¦apoc.coll.dropDuplicateNeighbors(list :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.dropDuplicateNeighbors(list) - remove duplicate consecutive objects in a list
-¦function¦apoc.coll.duplicates¦apoc.coll.duplicates(coll :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.duplicates(coll) - returns a list of duplicate items in the collection
-¦function¦apoc.coll.duplicatesWithCount¦apoc.coll.duplicatesWithCount(coll :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.duplicatesWithCount(coll) - returns a list of duplicate items in the collection and their count, keyed by `item` and `count` (e.g., `[{item: xyz, count:2}, {item:zyx, count:5}]`)
-¦function¦apoc.coll.fill¦apoc.coll.fill(item :: STRING?, count :: INTEGER?) :: (LIST? OF ANY?)¦apoc.coll.fill(item, count) - returns a list with the given count of items
-¦function¦apoc.coll.flatten¦apoc.coll.flatten(coll :: LIST? OF ANY?, recursive = false :: BOOLEAN?) :: (LIST? OF ANY?)¦apoc.coll.flatten(coll, [recursive]) - flattens list (nested if recursive is true)
-¦function¦apoc.coll.frequencies¦apoc.coll.frequencies(coll :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.frequencies(coll) - returns a list of frequencies of the items in the collection, keyed by `item` and `count` (e.g., `[{item: xyz, count:2}, {item:zyx, count:5}, {item:abc, count:1}]`)
-¦function¦apoc.coll.frequenciesAsMap¦apoc.coll.frequenciesAsMap(coll :: LIST? OF ANY?) :: (MAP?)¦apoc.coll.frequenciesAsMap(coll) - return a map of frequencies of the items in the collection, key `item`, value `count` (e.g., `{1:2, 2:1}`)
-¦function¦apoc.coll.indexOf¦apoc.coll.indexOf(coll :: LIST? OF ANY?, value :: ANY?) :: (INTEGER?)¦apoc.coll.indexOf(coll, value) | position of value in the list
-¦function¦apoc.coll.insert¦apoc.coll.insert(coll :: LIST? OF ANY?, index :: INTEGER?, value :: ANY?) :: (LIST? OF ANY?)¦apoc.coll.insert(coll, index, value) | insert value at index
-¦function¦apoc.coll.insertAll¦apoc.coll.insertAll(coll :: LIST? OF ANY?, index :: INTEGER?, values :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.insertAll(coll, index, values) | insert values at index
-¦function¦apoc.coll.intersection¦apoc.coll.intersection(first :: LIST? OF ANY?, second :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.intersection(first, second) - returns the unique intersection of the two lists
-¦function¦apoc.coll.isEqualCollection¦apoc.coll.isEqualCollection(coll :: LIST? OF ANY?, values :: LIST? OF ANY?) :: (BOOLEAN?)¦apoc.coll.isEqualCollection(coll, values) return true if two collections contain the same elements with the same cardinality in any order (using a HashMap)
-¦function¦apoc.coll.max¦apoc.coll.max(values :: LIST? OF ANY?) :: (ANY?)¦apoc.coll.max([0.5,1,2.3])
-¦function¦apoc.coll.min¦apoc.coll.min(values :: LIST? OF ANY?) :: (ANY?)¦apoc.coll.min([0.5,1,2.3])
-¦function¦apoc.coll.occurrences¦apoc.coll.occurrences(coll :: LIST? OF ANY?, item :: ANY?) :: (INTEGER?)¦apoc.coll.occurrences(coll, item) - returns the count of the given item in the collection
-¦function¦apoc.coll.pairWithOffset¦apoc.coll.pairWithOffset(values :: LIST? OF ANY?, offset :: INTEGER?) :: (LIST? OF ANY?)¦apoc.coll.pairWithOffset(values, offset) - returns a list of pairs defined by the offset
-¦function¦apoc.coll.pairs¦apoc.coll.pairs(list :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.pairs([1,2,3]) returns [1,2],[2,3],[3,null] 
-¦function¦apoc.coll.pairsMin¦apoc.coll.pairsMin(list :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.pairsMin([1,2,3]) returns [1,2],[2,3]
-¦function¦apoc.coll.partition¦apoc.coll.partition(values :: LIST? OF ANY?, batchSize :: INTEGER?) :: (LIST? OF ANY?)¦apoc.coll.partition(list,batchSize)
-¦function¦apoc.coll.randomItem¦apoc.coll.randomItem(coll :: LIST? OF ANY?) :: (ANY?)¦apoc.coll.randomItem(coll)- returns a random item from the list, or null on an empty or null list
-¦function¦apoc.coll.randomItems¦apoc.coll.randomItems(coll :: LIST? OF ANY?, itemCount :: INTEGER?, allowRepick = false :: BOOLEAN?) :: (LIST? OF ANY?)¦apoc.coll.randomItems(coll, itemCount, allowRepick: false) - returns a list of itemCount random items from the original list, optionally allowing picked elements to be picked again
-¦function¦apoc.coll.remove¦apoc.coll.remove(coll :: LIST? OF ANY?, index :: INTEGER?, length = 1 :: INTEGER?) :: (LIST? OF ANY?)¦apoc.coll.remove(coll, index, [length=1]) | remove range of values from index to length
-¦function¦apoc.coll.removeAll¦apoc.coll.removeAll(first :: LIST? OF ANY?, second :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.removeAll(first, second) - returns first list with all elements of second list removed
-¦function¦apoc.coll.reverse¦apoc.coll.reverse(coll :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.reverse(coll) - returns reversed list
-¦function¦apoc.coll.runningTotal¦apoc.coll.runningTotal(list :: LIST? OF NUMBER?) :: (LIST? OF ANY?)¦apoc.coll.runningTotal(list1) - returns an accumulative array. For example apoc.coll.runningTotal([1,2,3.5]) return [1,3,6.5]
-¦function¦apoc.coll.set¦apoc.coll.set(coll :: LIST? OF ANY?, index :: INTEGER?, value :: ANY?) :: (LIST? OF ANY?)¦apoc.coll.set(coll, index, value) | set index to value
-¦function¦apoc.coll.shuffle¦apoc.coll.shuffle(coll :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.shuffle(coll) - returns the shuffled list
-¦function¦apoc.coll.sort¦apoc.coll.sort(coll :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.sort(coll) sort on Collections
-¦function¦apoc.coll.sortMaps¦apoc.coll.sortMaps(coll :: LIST? OF MAP?, prop :: STRING?) :: (LIST? OF ANY?)¦apoc.coll.sortMaps([maps], 'name') - sort maps by property
-¦function¦apoc.coll.sortMulti¦apoc.coll.sortMulti(coll :: LIST? OF MAP?, orderFields = [] :: LIST? OF STRING?, limit = -1 :: INTEGER?, skip = 0 :: INTEGER?) :: (LIST? OF ANY?)¦apoc.coll.sortMulti(coll, ['^name','age'],[limit],[skip]) - sort list of maps by several sort fields (ascending with ^ prefix) and optionally applies limit and skip
-¦function¦apoc.coll.sortNodes¦apoc.coll.sortNodes(coll :: LIST? OF NODE?, prop :: STRING?) :: (LIST? OF ANY?)¦apoc.coll.sortNodes([nodes], 'name') sort nodes by property
-¦function¦apoc.coll.sortText¦apoc.coll.sortText(coll :: LIST? OF STRING?, conf = {} :: MAP?) :: (LIST? OF ANY?)¦apoc.coll.sortText(coll) sort on string based collections
-¦function¦apoc.coll.subtract¦apoc.coll.subtract(first :: LIST? OF ANY?, second :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.subtract(first, second) - returns unique set of first list with all elements of second list removed
-¦function¦apoc.coll.sum¦apoc.coll.sum(numbers :: LIST? OF NUMBER?) :: (FLOAT?)¦apoc.coll.sum([0.5,1,2.3])
-¦function¦apoc.coll.sumLongs¦apoc.coll.sumLongs(numbers :: LIST? OF NUMBER?) :: (INTEGER?)¦apoc.coll.sumLongs([1,3,3])
-¦function¦apoc.coll.toSet¦apoc.coll.toSet(values :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.toSet([list]) returns a unique list backed by a set
-¦function¦apoc.coll.union¦apoc.coll.union(first :: LIST? OF ANY?, second :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.union(first, second) - creates the distinct union of the 2 lists
-¦function¦apoc.coll.unionAll¦apoc.coll.unionAll(first :: LIST? OF ANY?, second :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.unionAll(first, second) - creates the full union with duplicates of the two lists
-¦function¦apoc.coll.zip¦apoc.coll.zip(list1 :: LIST? OF ANY?, list2 :: LIST? OF ANY?) :: (LIST? OF ANY?)¦apoc.coll.zip([list1],[list2])
+¦Qualified Name¦Type¦Release
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.elements icon:book[]]
+
+apoc.coll.elements(list,limit,offset) yield _1,_2,..,_10,_1s,_2i,_3f,_4m,_5l,_6n,_7r,_8p - deconstruct subset of mixed list into identifiers of the correct type
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.pairWithOffset icon:book[]]
+
+apoc.coll.pairWithOffset(values, offset) - returns a list of pairs defined by the offset
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.partition icon:book[]]
+
+apoc.coll.partition(list,batchSize)
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.split icon:book[]]
+
+apoc.coll.split(list,value) \| splits collection on given values rows of lists, value itself will not be part of resulting lists
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.zipToRows icon:book[]]
+
+apoc.coll.zipToRows(list1,list2) - creates pairs like zip but emits one row per pair
+|label:procedure[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.avg icon:book[]]
+
+apoc.coll.avg([0.5,1,2.3])
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.combinations icon:book[]]
+
+apoc.coll.combinations(coll, minSelect, maxSelect:minSelect) - Returns collection of all combinations of list elements of selection size between minSelect and maxSelect (default:minSelect), inclusive
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.contains icon:book[]]
+
+apoc.coll.contains(coll, value) optimized contains operation (using a HashSet) (returns single row or not)
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.containsAll icon:book[]]
+
+apoc.coll.containsAll(coll, values) optimized contains-all operation (using a HashSet) (returns single row or not)
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.containsAllSorted icon:book[]]
+
+apoc.coll.containsAllSorted(coll, value) optimized contains-all on a sorted list operation (Collections.binarySearch) (returns single row or not)
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.containsDuplicates icon:book[]]
+
+apoc.coll.containsDuplicates(coll) - returns true if a collection contains duplicate elements
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.containsSorted icon:book[]]
+
+apoc.coll.containsSorted(coll, value) optimized contains on a sorted list operation (Collections.binarySearch) (returns single row or not)
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.different icon:book[]]
+
+apoc.coll.different(values) - returns true if values are different
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.disjunction icon:book[]]
+
+apoc.coll.disjunction(first, second) - returns the disjunct set of the two lists
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.dropDuplicateNeighbors icon:book[]]
+
+apoc.coll.dropDuplicateNeighbors(list) - remove duplicate consecutive objects in a list
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.duplicates icon:book[]]
+
+apoc.coll.duplicates(coll) - returns a list of duplicate items in the collection
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.duplicatesWithCount icon:book[]]
+
+apoc.coll.duplicatesWithCount(coll) - returns a list of duplicate items in the collection and their count, keyed by `item` and `count` (e.g., `[{item: xyz, count:2}, {item:zyx, count:5}]`)
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.fill icon:book[]]
+
+apoc.coll.fill(item, count) - returns a list with the given count of items
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.flatten icon:book[]]
+
+apoc.coll.flatten(coll, [recursive]) - flattens list (nested if recursive is true)
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.frequencies icon:book[]]
+
+apoc.coll.frequencies(coll) - returns a list of frequencies of the items in the collection, keyed by `item` and `count` (e.g., `[{item: xyz, count:2}, {item:zyx, count:5}, {item:abc, count:1}]`)
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.frequenciesAsMap icon:book[]]
+
+apoc.coll.frequenciesAsMap(coll) - return a map of frequencies of the items in the collection, key `item`, value `count` (e.g., `{1:2, 2:1}`)
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.indexOf icon:book[]]
+
+apoc.coll.indexOf(coll, value) \| position of value in the list
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.insert icon:book[]]
+
+apoc.coll.insert(coll, index, value) \| insert value at index
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.insertAll icon:book[]]
+
+apoc.coll.insertAll(coll, index, values) \| insert values at index
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.intersection icon:book[]]
+
+apoc.coll.intersection(first, second) - returns the unique intersection of the two lists
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.isEqualCollection icon:book[]]
+
+apoc.coll.isEqualCollection(coll, values) return true if two collections contain the same elements with the same cardinality in any order (using a HashMap)
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.max icon:book[]]
+
+apoc.coll.max([0.5,1,2.3])
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.min icon:book[]]
+
+apoc.coll.min([0.5,1,2.3])
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.occurrences icon:book[]]
+
+apoc.coll.occurrences(coll, item) - returns the count of the given item in the collection
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.pairWithOffset icon:book[]]
+
+apoc.coll.pairWithOffset(values, offset) - returns a list of pairs defined by the offset
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.pairs icon:book[]]
+
+apoc.coll.pairs([1,2,3]) returns [1,2],[2,3],[3,null] 
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.pairsMin icon:book[]]
+
+apoc.coll.pairsMin([1,2,3]) returns [1,2],[2,3]
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.partition icon:book[]]
+
+apoc.coll.partition(list,batchSize)
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.randomItem icon:book[]]
+
+apoc.coll.randomItem(coll)- returns a random item from the list, or null on an empty or null list
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.randomItems icon:book[]]
+
+apoc.coll.randomItems(coll, itemCount, allowRepick: false) - returns a list of itemCount random items from the original list, optionally allowing picked elements to be picked again
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.remove icon:book[]]
+
+apoc.coll.remove(coll, index, [length=1]) \| remove range of values from index to length
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.removeAll icon:book[]]
+
+apoc.coll.removeAll(first, second) - returns first list with all elements of second list removed
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.reverse icon:book[]]
+
+apoc.coll.reverse(coll) - returns reversed list
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.runningTotal icon:book[]]
+
+apoc.coll.runningTotal(list1) - returns an accumulative array. For example apoc.coll.runningTotal([1,2,3.5]) return [1,3,6.5]
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.set icon:book[]]
+
+apoc.coll.set(coll, index, value) \| set index to value
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.shuffle icon:book[]]
+
+apoc.coll.shuffle(coll) - returns the shuffled list
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.sort icon:book[]]
+
+apoc.coll.sort(coll) sort on Collections
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.sortMaps icon:book[]]
+
+apoc.coll.sortMaps([maps], 'name') - sort maps by property
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.sortMulti icon:book[]]
+
+apoc.coll.sortMulti(coll, ['^name','age'],[limit],[skip]) - sort list of maps by several sort fields (ascending with ^ prefix) and optionally applies limit and skip
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.sortNodes icon:book[]]
+
+apoc.coll.sortNodes([nodes], 'name') sort nodes by property
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.sortText icon:book[]]
+
+apoc.coll.sortText(coll) sort on string based collections
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.stdev icon:book[]]
+
+apoc.coll.stdev(list, isBiasCorrected) - returns the sample or population standard deviation with isBiasCorrected true or false respectively. For example apoc.coll.stdev([10, 12, 23]) return 7
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.subtract icon:book[]]
+
+apoc.coll.subtract(first, second) - returns unique set of first list with all elements of second list removed
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.sum icon:book[]]
+
+apoc.coll.sum([0.5,1,2.3])
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.sumLongs icon:book[]]
+
+apoc.coll.sumLongs([1,3,3])
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.toSet icon:book[]]
+
+apoc.coll.toSet([list]) returns a unique list backed by a set
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.union icon:book[]]
+
+apoc.coll.union(first, second) - creates the distinct union of the 2 lists
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.unionAll icon:book[]]
+
+apoc.coll.unionAll(first, second) - creates the full union with duplicates of the two lists
+|label:function[]
+|label:apoc-core[]
+|xref::overview/apoc.coll/apoc.coll.adoc[apoc.coll.zip icon:book[]]
+
+apoc.coll.zip([list1],[list2])
+|label:function[]
+|label:apoc-core[]

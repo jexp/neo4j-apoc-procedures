@@ -1,5 +1,5 @@
-¦xref::overview/apoc.load.directory.async/apoc.load.directory.async.remove.adoc[apoc.load.directory.async.remove icon:book[]] +
+¦xref::overview/apoc.load/apoc.load.directory.async.remove.adoc[apoc.load.directory.async.remove icon:book[]] +
 
-`apoc.load.directory.async.remove(name) YIELD name, status, pattern, cypher, urlDir, config, error` - Remove a folder listener by name and return remaining listeners, if any
+ - Remove a folder listener by name and return remaining listeners, if any
 ¦label:procedure[]
 ¦label:apoc-core[]

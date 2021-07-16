@@ -79,6 +79,28 @@ public class PeriodicTest {
     }
 
     @Test
+    public void testSubmitStatementWithParams() throws Exception {
+        String callList = "CALL apoc.periodic.list()";
+        // force pre-caching the queryplan
+        assertFalse(db.executeTransactionally(callList, Collections.emptyMap(), Result::hasNext));
+
+        testCall(db, "CALL apoc.periodic.submit('foo','create (:Foo { id: $id })', {params: {id: '(╯°□°)╯︵ ┻━┻' }})",
+                (row) -> {
+                    assertEquals("foo", row.get("name"));
+                    assertEquals(false, row.get("done"));
+                    assertEquals(false, row.get("cancelled"));
+                    assertEquals(0L, row.get("delay"));
+                    assertEquals(0L, row.get("rate"));
+                });
+
+        long count = tryReadCount(50, "MATCH (:Foo { id: '(╯°□°)╯︵ ┻━┻' }) RETURN COUNT(*) AS count", 1L);
+
+        assertThat(count, equalTo(1L));
+
+        testCall(db, callList, (r) -> assertEquals(true, r.get("done")));
+    }
+
+    @Test
     public void testSlottedRuntime() throws Exception {
         assertTrue(Periodic.slottedRuntime("MATCH (n) RETURN n").contains("cypher runtime=slotted "));
         assertFalse(Periodic.slottedRuntime("cypher runtime=compiled MATCH (n) RETURN n").contains("cypher runtime=slotted "));

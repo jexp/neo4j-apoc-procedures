@@ -82,11 +82,8 @@ subprojects {
             maxHeapSize = "512m"
         }
 
-        filter {
-            setFailOnNoMatchingTests(false)
-        }
-
-        ignoreFailures(true)
+        testLogging.showStandardStreams = true
+        testLogging.exceptionFormat = 'full'
     }
 
     configurations {

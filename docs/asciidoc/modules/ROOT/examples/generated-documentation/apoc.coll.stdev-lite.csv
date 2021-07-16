@@ -1,0 +1,2 @@
+¦signature
+¦apoc.coll.stdev(list :: LIST? OF NUMBER?, isBiasCorrected = true :: BOOLEAN?) :: (NUMBER?)
