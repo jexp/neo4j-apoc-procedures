@@ -315,3 +315,57 @@ a|
 }
 ----
 |===
+
+
+On the other hand, we can also include everything and specify certain nodes/relationships to exclude.
+For example:
+
+[source,cypher]
+----
+MATCH path = (p:Person {name:'James Thompson'})-[:REVIEWED]->(movie)
+WITH collect(path) AS paths
+CALL apoc.convert.toTree(paths, true, {
+  nodes: {Movie: ['-title']},
+  rels:  {reviewed: ['-rating']}
+})
+YIELD value
+RETURN value;
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| value
+a|
+[source,json]
+----
+{
+  "_type": "Person",
+  "name": "James Thompson",
+  "reviewed": [
+    {
+      "_type": "Movie",
+      "tagline": "Everything that has a beginning has an end",
+      "reviewed.summary": "The best of the three",
+      "_id": 6,
+      "released": 2003
+    },
+    {
+      "_type": "Movie",
+      "tagline": "Free your mind",
+      "reviewed.summary": "It was alright.",
+      "_id": 5,
+      "released": 2003
+    },
+    {
+      "_type": "Movie",
+      "tagline": "Welcome to the Real World",
+      "reviewed.summary": "Enjoyed it!",
+      "_id": 4,
+      "released": 1999
+    }
+  ],
+  "_id": 3
+}
+----
+|===
