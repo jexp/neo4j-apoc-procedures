@@ -95,3 +95,43 @@ RETURN file, nodes, relationships, properties, data
 "
 
 |===
+
+You can use the configuration `sampling` (default: `false`).
+With this config, the `apoc.export.csv.all` procedure uses
+the `apoc.meta.nodeTypeProperties` and the `apoc.meta.relTypeProperties` procedures under the hood to get the property types.
+You can customize the configuration of these 2 `apoc.meta.*` procedure, using the `samplingConfig: MAP` configuration, 
+to limit the number of nodes/rels to analyze.
+
+So you can execute with the following data set:
+
+[source,cypher]
+----
+CREATE (:User:Sample {`last:Name`:'Galilei'}), (:User:Sample {address:'Universe'}), 
+    (:User:Sample {foo:'bar'})-[:KNOWS {one: 'two', three: 'four'}]->(:User:Sample {baz:'baa', foo: true})
+----
+
+Combined with the following query:
+[source,cypher]
+----
+CALL apoc.export.csv.all('movies.csv', {sampling: true, samplingConfig: {sample: 1}})
+----
+
+.Results
+[opts="header"]
+|===
+| file         | source                        | format | nodes | relationships | properties    | time | rows | batchSize  | batches    | done | data
+| "movies.csv" | "database: nodes(4), rels(1)" | "csv"  | 4     | 1             | 3             | 4   | 5   | 20000         | 1         | TRUE | NULL
+|===
+
+Execution of the above query would output content similar to that below (result could change depending on the `sample`):
+
+.movies.csv
+[source,csv]
+----
+"_id","_labels","baz","foo","_start","_end","_type"
+"0",":Sample:User","","",,,
+"1",":Sample:User","","",,,
+"2",":Sample:User","","bar",,,
+"3",":Sample:User","baa","true",,,
+,,,,"2","3","KNOWS"
+----
