@@ -2,6 +2,7 @@ package apoc.date;
 
 import apoc.util.DateFormatUtil;
 import apoc.util.Util;
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.procedure.*;
@@ -162,7 +163,7 @@ public class Date {
 	@UserFunction
 	@Description("apoc.date.parse('2012-12-23','ms|s|m|h|d','yyyy-MM-dd') - parse date string using the specified format into the specified time unit")
 	public Long parse(@Name("time") String time, @Name(value = "unit", defaultValue = "ms") String unit, @Name(value = "format",defaultValue = DEFAULT_FORMAT) String format, final @Name(value = "timezone", defaultValue = "") String timezone) {
-		Long value = parseOrThrow(time, getFormat(format, timezone));
+		Long value = StringUtils.isBlank(time) ? null : parseOrThrow(time, getFormat(format, timezone));
 		return value == null ? null : unit(unit).convert(value, TimeUnit.MILLISECONDS);
 	}
 
