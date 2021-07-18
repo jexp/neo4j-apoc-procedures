@@ -17,11 +17,13 @@ This functionality is inspired by the work of https://twitter.com/kc1s[Martin Ju
 
 Basically you can use any `+(entity)<-->(entity)+` graph for the grouping, support for graph projections is on the roadmap.
 
+Here is an example using the dataset from `:play movies`.
+
 .Example on movie graph
 [source,cypher]
 ----
 MATCH (n)
-SET n.century = toInteger(coalesce(n.born,n.relased)/100) * 100;
+SET n.century = toInteger(coalesce(n.born,n.released)/100) * 100;
 
 CALL apoc.nodes.group(['Person','Movie'],['century']);
 ----
@@ -116,8 +118,20 @@ CALL apoc.nodes.group(['*'],['gender'],
   [{`*`:'count', age:'min'}, {`*`:'count'} ])
 ----
 
-image::
+.Results
+[opts="header", cols="4"]
+|===
+| nodes	| relationships	| node |	relationship 
+| [{"identity":-45,"labels":["Person"],"properties":{"gender":"female","min_age":28,"count_*":2}}] | [{"identity":-68,"start":-45,"end":-44,"type":"MEMBER_OF","properties":{"count_*":3}},{"identity":-69,"start":-45,"end":-46,"type":"KNOWS","properties":{"count_*":2}}] | {"identity":-45,"labels":["Person"],"properties":{"gender":"female","min_age":28,"count_*":2}} | {"identity":-68,"start":-45,"end":-44,"type":"MEMBER_OF","properties":{"count_*":3}}
+| [{"identity":-45,"labels":["Person"],"properties":{"gender":"female","min_age":28,"count_*":2}}] | [{"identity":-69,"start":-45,"end":-46,"type":"KNOWS","properties":{"count_*":2}}] | {"identity":-45,"labels":["Person"],"properties":{"gender":"female","min_age":28,"count_*":2}} | {"identity":-69,"start":-45,"end":-46,"type":"KNOWS","properties":{"count_*":2}} 
+| [{"identity":-46,"labels":["Person"],"properties":{"gender":"male","min_age":42,"count_*":1}}] | [{"identity":-70,"start":-46,"end":-44,"type":"MEMBER_OF","properties":{"count_*":1}}] | {"identity":-46,"labels":["Person"],"properties":{"gender":"male","min_age":42,"count_*":1}} | {"identity":-70,"start":-46,"end":-44,"type":"MEMBER_OF","properties":{"count_*":1}} 
+| [{"identity":-44,"labels":["Forum"],"properties":{"gender":null,"count_*":2}}] | [] | {"identity":-44,"labels":["Forum"],"properties":{"gender":null,"count_*":2}} | null
+|===
 
+
+Note that this query doesn't work in Neo4j Browser in "Graph" mode but only in "Table" mode (or also in cypher-shell) because, 
+since `Forum` does not have the `gender` property, in `node` result there will be a `"gender": null` property which is not supported and returns a `TypeError`.
+Instead, the query below also works in "Graph" mode:
 
 [source,cypher]
 ----
@@ -137,7 +151,6 @@ unwind range(1,1000) as id
 create (u:User {id:id, age : id % 100, female: rand() < 0.5, name: "Name "+id, country:tld[toInteger(rand()*size(tld))]})
 with collect(u) as users
 unwind users as u
-unwind range(1,10) as r
 with u, users[toInteger(rand()*size(users))] as u2
 where u <> u2
 merge (u)-[:KNOWS]-(u2);
