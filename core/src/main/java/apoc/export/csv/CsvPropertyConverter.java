@@ -1,20 +1,30 @@
 package apoc.export.csv;
 
+import org.apache.commons.lang.StringUtils;
 import org.neo4j.graphdb.Entity;
 
 import java.util.List;
+import java.util.Objects;
 
 public class CsvPropertyConverter {
 
-    public static boolean addPropertyToGraphEntity(Entity entity, CsvHeaderField field, Object value) {
-        if (field.isIgnore()) {
+    public static boolean addPropertyToGraphEntity(Entity entity, CsvHeaderField field, Object value, CsvLoaderConfig config) {
+        if (field.isIgnore() || value == null) {
             return false;
         }
         if (field.isArray()) {
+            final List list = (List) value;
+            final boolean listContainingNull = list.stream().anyMatch(Objects::isNull);
+            if (listContainingNull) {
+                return false;
+            }
             final Object[] prototype = getPrototypeFor(field.getType());
-            final Object[] array = ((List<Object>) value).toArray(prototype);
+            final Object[] array = list.toArray(prototype);
             entity.setProperty(field.getName(), array);
         } else {
+            if (config.isIgnoreEmptyString() && value instanceof String && StringUtils.isBlank((String) value)) {
+                return false;
+            }
             entity.setProperty(field.getName(), value);
         }
         return true;
@@ -22,9 +32,9 @@ public class CsvPropertyConverter {
 
     static Object[] getPrototypeFor(String type) {
         switch (type) {
-            case "INT":     return new Integer  [] {};
+            case "INT":
             case "LONG":    return new Long     [] {};
-            case "FLOAT":   return new Float    [] {};
+            case "FLOAT":
             case "DOUBLE":  return new Double   [] {};
             case "BOOLEAN": return new Boolean  [] {};
             case "BYTE":    return new Byte     [] {};

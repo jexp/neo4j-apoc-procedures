@@ -10,4 +10,5 @@ The procedure support the following config parameters:
 | quotationCharacter | String | " | quotation character   | `--quote='"'`
 | stringIds | Boolean | true | treat ids as strings  | `--id-type=STRING`
 | skipLines | Integer | 1 | lines to skip (incl. header)  | N/A
+| ignoreEmptyString | Boolean | false | if true ignore properties with an empty string | N/A
 |===

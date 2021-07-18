@@ -8,13 +8,16 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.internal.helpers.collection.Iterators;
 import org.neo4j.test.rule.DbmsRule;
 import org.neo4j.test.rule.ImpermanentDbmsRule;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +25,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static apoc.util.MapUtil.map;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 public class ImportCsvTest {
@@ -99,7 +105,13 @@ public class ImportCsvTest {
                             "2|Jane\n"),
                     new AbstractMap.SimpleEntry<>("personsWithoutIdField", "name:STRING\n" +
                             "John\n" +
-                            "Jane\n")
+                            "Jane\n"),
+                    new AbstractMap.SimpleEntry<>("emptyInteger", 
+                            ":ID(node_space_1),:LABEL,str_attribute:STRING,int_attribute:INT,int_attribute_array:INT[],double_attribute_array:FLOAT[]\n" +
+                            "n1,Thing,once upon a time,1,\"2;3\",\"2.3;3.5\"\n" +
+                            "n2,Thing,,2,\"4;5\",\"2.6;3.6\"\n" +
+                            "n3,Thing,,,,\n"
+                    )
             ).collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue)));
 
     @Before
@@ -285,6 +297,32 @@ public class ImportCsvTest {
 
         Assert.assertEquals("John Jane", TestUtil.singleResultFirstColumn(db, "MATCH (p1:Person)-[:FRIENDS_WITH]->(p2:Person) RETURN p1.name + ' ' + p2.name AS pair ORDER BY pair"));
         Assert.assertEquals("Jane John", TestUtil.singleResultFirstColumn(db, "MATCH (p1:Person)-[:KNOWS]->(p2:Person) RETURN p1.name + ' ' + p2.name AS pair ORDER BY pair"));
+    }
+    
+    @Test
+    public void testEmptyInteger() {
+        TestUtil.testCall(db, "CALL apoc.import.csv([{fileName: 'file:/emptyInteger.csv', labels: ['entity']}], [], {ignoreEmptyString: true})",
+                r -> assertEquals(3L, r.get("nodes")));
+
+        TestUtil.testResult(db, "MATCH (node:Thing) RETURN node ORDER BY node.int_attribute", r -> {
+                    final Node firstNode = (Node) r.next().get("node");
+                    final Map<String, Object> firstProps = firstNode.getAllProperties();
+                    assertEquals(1L, firstProps.get("int_attribute"));
+                    assertArrayEquals(new long[] { 2L, 3L }, (long[]) firstProps.get("int_attribute_array"));
+                    assertArrayEquals(new double[] { 2.3D, 3.5D }, (double[]) firstProps.get("double_attribute_array"), 0);
+                    final Node secondNode = (Node) r.next().get("node");
+                    final Map<String, Object> secondProps = secondNode.getAllProperties();
+                    assertEquals(2L, secondProps.get("int_attribute"));
+                    assertArrayEquals(new long[] { 4L, 5L }, (long[]) secondProps.get("int_attribute_array"));
+                    assertArrayEquals(new double[] { 2.6D, 3.6D }, (double[]) secondProps.get("double_attribute_array"), 0);
+                    final Node thirdNode = (Node) r.next().get("node");
+                    final Map<String, Object> thirdProps = thirdNode.getAllProperties();
+                    assertNull(thirdProps.get("int_attribute"));
+                    assertNull(thirdProps.get("int_attribute_array"));
+                    assertNull(thirdProps.get("double_attribute_array"));
+                    assertNull(thirdProps.get("str_attribute"));
+                    assertFalse(r.hasNext());
+                });
     }
 
     @Test

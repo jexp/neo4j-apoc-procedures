@@ -136,7 +136,7 @@ public class CsvEntityLoader {
                         node.setProperty(field.getName(), idValue);
                         props++;
                     } else {
-                        boolean propertyAdded = CsvPropertyConverter.addPropertyToGraphEntity(node, field, value);
+                        boolean propertyAdded = CsvPropertyConverter.addPropertyToGraphEntity(node, field, value,clc);
                         props += propertyAdded ? 1 : 0;
                     }
                 }
@@ -232,7 +232,7 @@ public class CsvEntityLoader {
                 for (CsvHeaderField field : edgePropertiesFields) {
                     final String name = field.getName();
                     Object value = result.map.get(name);
-                    boolean propertyAdded = CsvPropertyConverter.addPropertyToGraphEntity(rel, field, value);
+                    boolean propertyAdded = CsvPropertyConverter.addPropertyToGraphEntity(rel, field, value, clc);
                     props += propertyAdded ? 1 : 0;
                 }
                 reporter.update(0, 1, props);
